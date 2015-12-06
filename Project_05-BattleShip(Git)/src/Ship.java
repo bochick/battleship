@@ -29,6 +29,10 @@ public class Ship {
         return false;
     }
     
+    public char title() {
+        return name.charAt(0);
+    }
+    
     public String toString() {
         return name + "has size " + size 
                 + " and has been hit " + hits + " times";
