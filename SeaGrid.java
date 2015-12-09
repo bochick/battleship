@@ -23,6 +23,11 @@ public class SeaGrid {
         }
     }
     
+    public void setSquare(int row, int col, char mark)
+    {
+        grid[row][col] = mark; 
+    }
+    
     public char getSquare(int row, int column) {
         return grid[row][column];
     }
