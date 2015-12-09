@@ -7,24 +7,20 @@ package battleship;
 
 import java.util.Random;
 
+
 /**
  *
- * @author cim217
+ * @author Anthony&Brad
  */
-public class AIPlayer extends Player {
-
+public class AiPlayer extends Player {
     private Random rand = new Random();
     private SeaGrid personalGrid;
     private SeaGrid guessGrid = new SeaGrid("Target grid");
+  
     private int[] lastAttack = new int[2];
 
-    public AIPlayer(String nameInput) {
+    public AiPlayer(String nameInput) {
         super(nameInput);
-    }
-
-    @Override
-    public void buildGrid() {
-        placeShips('r');
     }
 
     //------------------------------------------
@@ -34,14 +30,26 @@ public class AIPlayer extends Player {
     //if they have, method will recurse.
     //------------------------------------------
     public int[] attack() {
-        int row;
-        int col;
+        int row = 0;
+        int col = 0;
 
         if (lastAttackHit()) {
-            //to do logic here
-            row = lastAttack[1] + 1;
-            col = lastAttack[0];
-        } else {
+            //------------------NOTES NOT YET COMPLETE-----------------
+            //if next attack hits, chose a direstion to try at random.
+            //"next" will have to be remembered if the attack hits again
+            //to keep trying that direction.
+            //more logic is needed to check if a direction is 
+            //even valid(on the grid)
+            //---------------------------------------------------------
+            int next = nextAttackDirection();
+            switch(next){
+                case 0:{row = lastAttack[1]++; col = lastAttack[0];}//up
+                case 1:{row = lastAttack[1]--; col = lastAttack[0];}//down
+                case 2:{row = lastAttack[1]; col = lastAttack[0]--;}//left
+                case 3:{row = lastAttack[1]; col = lastAttack[0]++;}//right
+            }
+        } 
+        else {
             row = rand.nextInt((10 - 1) + 1) + 1;
             col = rand.nextInt((10 - 1) + 1) + 1;
         }
@@ -54,6 +62,10 @@ public class AIPlayer extends Player {
         }
     }
 
+    private int nextAttackDirection(){
+       int direction = rand.nextInt(3);
+        return direction;
+    }
     //--------------------------------------------
     //lastAttackHit() used to check if the last
     //shot fired was a hit.
@@ -66,6 +78,5 @@ public class AIPlayer extends Player {
             return false;
         }
     }
-    
-    
+
 }
