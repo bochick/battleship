@@ -67,44 +67,46 @@ public class Player {
         System.out.println(personalGrid);
      }
     
-    private void playerPlace() {
+    private String shipInfo() {
         String printShips = "";
-        int dir = 0;
-        int ship = 0;
         
-        for (int i = 0; i < fleet.length; i++) //prints out the list of ships to place
+        for (int i = 0; i < fleet.length; i++) 
             printShips += "["+ fleet[i].title() + "]" + fleet[i].getName() 
                     + "(" + fleet[i].getSize() + ") ";
-
+        
+        return printShips;
+    }
+    
+    private void playerPlace() {
+        int shipIndex = 0;
+        String printShips = shipInfo();
+        
         System.out.println(printShips + "\n" + "[U]Up [D]Down [L]Left [R]Right");
         System.out.print(personalGrid);
         
-        while (ship < fleet.length) { //cycles through the array of ships
-            String input = "";
+        //cycles through the array of ships
+        while (shipIndex < fleet.length) { 
+            printShips = fleet[shipIndex] +  ": [row] [column] [direction]";
             
+            System.out.println(printShips);
+            String input = cin.nextLine();
+           
             // makes sure the input matches the criteria: [row] [column] [direction]
             while (!Pattern.matches("[0-9]{1,} [0-9]{1,} [u|U|d|D|l|L|r|R]?", input)) {
-                System.out.println(fleet[ship] +  ": [row] [column] [direction]");
+                System.out.println("Incorrect format entry.\n" + printShips);
                 input = cin.nextLine();
             }
             String arr[] = input.split(" "); //breakes the input into an array
 
-            int row = Integer.parseInt(arr[0]) - 1;
-            int col = Integer.parseInt(arr[1]) - 1;
+            int row = Integer.parseInt(arr[0]) - 1;//first array element int
+            int col = Integer.parseInt(arr[1]) - 1;//second array element int
+            int dir = charToIntDir(arr[2].charAt(0));//third array element String
             
-            //sets the direction
-            if (arr[2].equalsIgnoreCase("D"))
-                dir = 0;
-            else if (arr[2].equalsIgnoreCase("U"))
-                dir = 1;
-            else if (arr[2].equalsIgnoreCase("R"))
-                dir = 2;
-            else if (arr[2].equalsIgnoreCase("L"))
-                dir = 3;
-
-            if (validPlacement(row, col, dir, fleet[ship].getSize())) {//if ship position is not invalid
-                for (int i = 0; i < fleet[ship].getSize(); i++) {
-                    personalGrid.update(row, col, fleet[ship].title());//places ship
+            //if ship position is not invalid 
+            if (validPlacement(row, col, dir, fleet[shipIndex].getSize())) {
+                for (int i = 0; i < fleet[shipIndex].getSize(); i++) {
+                    //places ship
+                    personalGrid.update(row, col, fleet[shipIndex].title());
                     if (dir == 0)//down
                         row++;
                     else if (dir == 1)//up
@@ -114,11 +116,24 @@ public class Player {
                     else if (dir == 3)//left
                         col--;
                 }
-                ship++;//next ship
+                shipIndex++;//next ship
             }
             else 
                 System.out.println("Invalid ship position.");
         }
+    }
+    
+    private int charToIntDir(char in) {
+        if (in == 'D')
+            return 0;
+        else if (in == 'U')
+            return 1;
+        else if (in == 'R')
+            return 2;
+        else if (in == 'L')
+            return 3;
+        else //failsafe down
+            return 0;
     }
     
     private void randomPlacement() {
