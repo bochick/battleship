@@ -160,7 +160,7 @@ public class Player {
         }
     }
     
-    public int[] attack(Player in){
+    public int[] attack(){
         System.out.print("What area would you like to attack? [row] [column]: ");
         int row = cin.nextInt() - 1;
         int col = cin.nextInt() - 1;
