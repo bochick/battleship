@@ -7,6 +7,8 @@ package battleship;
 public class SeaGrid {
     
     private final int SIZE = 10;
+    private static final String LETTER[]
+            = {"A","B","C","D","E","F","G","H","I","J"};
     private char[][] grid = new char[SIZE][SIZE];
     String name;
     
@@ -34,7 +36,7 @@ public class SeaGrid {
 
         for (int row=0; row < grid.length; row++)
         {
-            result += (row + 1) + "\t";
+            result += LETTER[(row)] + "\t";
             for (int column=0; column < grid[row].length; column++)
                 result += grid[row][column] + "\t";
             result += "\n";
