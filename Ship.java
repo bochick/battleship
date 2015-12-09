@@ -8,7 +8,7 @@ public class Ship {
     private int size;
     private int hits;
     private int direction;
-    private int[] location;
+    private int[] location = new int[2];
     
     public Ship (String nameIn, int sizeIn) {
         name = nameIn;
@@ -33,8 +33,8 @@ public class Ship {
     }
     
     public void setLocation(int x, int y) {
-        location[0] = x;
-        location[1] = y;
+        location[0] = y;
+        location[1] = x;
     }
     
     public void setDirection(int dir) {
