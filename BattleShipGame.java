@@ -4,7 +4,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author JM
+ * @author 
  */
 public class BattleShipGame {
     
