@@ -6,23 +6,25 @@
 package battleship;
 
 import java.util.Random;
-import java.util.Scanner;
 
 /**
  *
  * @author cim217
  */
-public class AiPlayer extends Player {
+public class AIPlayer extends Player {
 
-    private Scanner cin = new Scanner(System.in);
     private Random rand = new Random();
     private SeaGrid personalGrid;
     private SeaGrid guessGrid = new SeaGrid("Target grid");
-    ;
     private int[] lastAttack = new int[2];
 
-    public AiPlayer(String nameInput) {
+    public AIPlayer(String nameInput) {
         super(nameInput);
+    }
+
+    @Override
+    public void buildGrid() {
+        placeShips('r');
     }
 
     //------------------------------------------
@@ -57,7 +59,6 @@ public class AiPlayer extends Player {
     //shot fired was a hit.
     //if it was, apply different logic in attack()
     //--------------------------------------------
-
     private boolean lastAttackHit() {
         if (hitOrMiss(lastAttack[0], lastAttack[1])) {
             return true;
@@ -65,5 +66,6 @@ public class AiPlayer extends Player {
             return false;
         }
     }
-
+    
+    
 }
