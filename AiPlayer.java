@@ -44,10 +44,10 @@ public class AiPlayer extends Player {
             //---------------------------------------------------------
             int next = nextAttackDirection();
             switch(next){
-                case 0:{row = lastAttack[1]++; col = lastAttack[0];}//up
-                case 1:{row = lastAttack[1]--; col = lastAttack[0];}//down
-                case 2:{row = lastAttack[1]; col = lastAttack[0]--;}//left
-                case 3:{row = lastAttack[1]; col = lastAttack[0]++;}//right
+                case 0:{row = lastAttack[1]--; col = lastAttack[0];}//up
+                case 1:{row = lastAttack[1]++; col = lastAttack[0];}//down
+                case 2:{row = lastAttack[1]; col = lastAttack[0]++;}//left
+                case 3:{row = lastAttack[1]; col = lastAttack[0]--;}//right
             }
         } 
         else {
