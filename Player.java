@@ -136,7 +136,7 @@ public class Player {
             return 0;
     }
     
-    private void randomPlacement() {
+    protected void randomPlacement() {
         int index = fleet.length - 1;
         
         while (index >= 0) {
