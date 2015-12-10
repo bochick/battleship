@@ -17,7 +17,7 @@ public class BattleShipGame {
         String input = cin.next();
         
         player = new Player(input);
-        ai = new Player("Marvin");
+        ai = new AiPlayer("Marvin");
         System.out.println("Welcome to Battle Ship "+ player.getRank() + " " 
                 + player.getName() + "! Prepare for combat.");
     }
@@ -25,9 +25,7 @@ public class BattleShipGame {
     public void play() {
         player.buildGrid();
         ai.buildGrid();
-        
-        
-        
+ 
         do
         {
            
@@ -65,6 +63,7 @@ public class BattleShipGame {
         {
             ai.GoodHit(coordinates[0], coordinates[1]);
             player.BadHit(coordinates[0], coordinates[1]);
+            System.out.println("AI hit one of your ships!");
         }
     }
 }
