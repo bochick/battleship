@@ -32,9 +32,9 @@ public class Ship {
         return direction;
     }
     
-    public void setLocation(int x, int y) {
-        location[0] = y;
-        location[1] = x;
+    public void setLocation(int row, int col) {
+        location[0] = row;
+        location[1] = col;
     }
     
     public void setDirection(int dir) {
