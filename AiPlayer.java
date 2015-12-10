@@ -29,6 +29,7 @@ public class AiPlayer extends Player {
     //if they have not attacked there before, return row, col
     //if they have, method will recurse.
     //------------------------------------------
+    @Override
     public int[] attack() {
         int row = 0;
         int col = 0;
@@ -50,8 +51,8 @@ public class AiPlayer extends Player {
             }
         } 
         else {
-            row = rand.nextInt((10 - 1) + 1) + 1;
-            col = rand.nextInt((10 - 1) + 1) + 1;
+            row = rand.nextInt(10);
+            col = rand.nextInt(10);
         }
         if (guessGrid.getSquare(row, col) == '^') {
             int output[] = {col, row};
@@ -72,11 +73,17 @@ public class AiPlayer extends Player {
     //if it was, apply different logic in attack()
     //--------------------------------------------
     private boolean lastAttackHit() {
-        if (hitOrMiss(lastAttack[0], lastAttack[1])) {
+        if (hitOrMiss(lastAttack[0], lastAttack[1]) != '^') {
             return true;
         } else {
             return false;
         }
     }
+    
+    @Override
+    public void buildGrid(){
+        randomPlacement();
+    }
 
+    
 }
