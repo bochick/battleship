@@ -32,9 +32,9 @@ public class Ship {
         return direction;
     }
     
-    public void setLocation(int row, int col) {
-        location[0] = row;
-        location[1] = col;
+    public void setLocation(int x, int y) {
+        location[0] = y;
+        location[1] = x;
     }
     
     public void setDirection(int dir) {
@@ -42,7 +42,7 @@ public class Ship {
     }
     
     public void hit() {
-        hits--;
+        hits++;
     }
     
     public boolean isSunk() {
@@ -52,7 +52,7 @@ public class Ship {
         return false;
     }
     
-    public char title() {
+    public char getTitle() {
         return name.charAt(0);
     }
     
