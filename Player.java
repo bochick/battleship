@@ -40,10 +40,12 @@ public class Player {
         cin.nextLine();//clears the input
         
         if (input.equalsIgnoreCase("N")) {
-            placeShips('r');
+            randomPlacement();
+            System.out.println(personalGrid);
         }
         else if (input.equalsIgnoreCase("Y")) {
-            placeShips('m');
+            playerPlace();
+            System.out.println(personalGrid);
         }
         else {
             System.out.print("Unknown command... ");
@@ -51,27 +53,11 @@ public class Player {
         }
     }
     
-     //Created to allow public override of 
-    //randomPlacement() without giving away position
-    public void placeShips(char choice) {
-        if (choice == 'r') {    //RANDOM
-            randomPlacement();
-        } else if (choice == 'm') {     //MANUAL
-            System.out.println(personalGrid);
-            playerPlace();
-        }
-        else {
-            System.out.print("Unknown command... ");
-            buildGrid();
-        }
-        System.out.println(personalGrid);
-     }
-    
     private String shipInfo() {
         String printShips = "";
-        
+        //prints out the list of ships to place
         for (int i = 0; i < fleet.length; i++) 
-            printShips += "["+ fleet[i].title() + "]" + fleet[i].getName() 
+            printShips += "["+ fleet[i].getTitle() + "]" + fleet[i].getName() 
                     + "(" + fleet[i].getSize() + ") ";
         
         return printShips;
@@ -81,6 +67,7 @@ public class Player {
         int shipIndex = 0;
         String printShips = shipInfo();
         
+
         System.out.println(printShips + "\n" + "[U]Up [D]Down [L]Left [R]Right");
         System.out.print(personalGrid);
         
@@ -98,15 +85,16 @@ public class Player {
             }
             String arr[] = input.split(" "); //breakes the input into an array
 
-            int row = Integer.parseInt(arr[0]) - 1;//first array element int
-            int col = Integer.parseInt(arr[1]) - 1;//second array element int
-            int dir = charToIntDir(arr[2].charAt(0));//third array element String
+            int row = Integer.parseInt(arr[0]) - 1;
+            int col = Integer.parseInt(arr[1]) - 1;
+            //third array element String
+            int dir = charToIntDir(arr[2].toUpperCase().charAt(0));
             
-            //if ship position is not invalid 
+            //if ship position is not invalid
             if (validPlacement(row, col, dir, fleet[shipIndex].getSize())) {
                 for (int i = 0; i < fleet[shipIndex].getSize(); i++) {
                     //places ship
-                    personalGrid.update(row, col, fleet[shipIndex].title());
+                    personalGrid.setSquare(row, col, fleet[shipIndex].getTitle());
                     if (dir == 0)//down
                         row++;
                     else if (dir == 1)//up
@@ -124,13 +112,13 @@ public class Player {
     }
     
     private int charToIntDir(char in) {
-        if (in == 'D')
+        if (in == 'D') //down
             return 0;
-        else if (in == 'U')
+        else if (in == 'U') //up
             return 1;
-        else if (in == 'R')
+        else if (in == 'R') //right
             return 2;
-        else if (in == 'L')
+        else if (in == 'L') //left
             return 3;
         else //failsafe down
             return 0;
@@ -148,7 +136,7 @@ public class Player {
                 fleet[index].setLocation(col, row);
                 fleet[index].setDirection(dir);
                 for (int i = 0; i < fleet[index].getSize(); i++) {
-                    personalGrid.update(row, col, fleet[index].title());
+                    personalGrid.setSquare(row, col, fleet[index].getTitle());
                 if (dir == 0)//down
                     row++;
                 else if (dir == 1)//up
@@ -204,13 +192,10 @@ public class Player {
         return output;
     }
     
-    
     public char hitOrMiss(int row, int col) {
-        char shot = personalGrid.getSquare(row, col);
-        //LOGIC NEEDS FIX
-        //WHAT IF THERE IS A 'H' or 'G' or 'S'?
-        if (shot != '^') 
-            return shot;
+        char square = personalGrid.getSquare(row, col);
+        if (square != '^') 
+            return square;
         else
             return '^';
     }
@@ -227,38 +212,21 @@ public class Player {
     public void BadHit(int row, int col)
     {
         char oldMark = personalGrid.getSquare(row, col);
+        char shipTitle = '0';
+        int index = 0;
         
-        switch(oldMark)
-        {
-            case 'D':
-                fleet[0].hit();
-                if(fleet[0].isSunk())
-                    System.out.println(name + "'s Destroyer was sunk!");
-                break;
-            case 'S':
-                fleet[1].hit();
-                if(fleet[1].isSunk())
-                    System.out.println(name + "'s Submarine was sunk!");
-                break;
-            case 'F':
-                fleet[2].hit();
-                if(fleet[2].isSunk())
-                    System.out.println(name + "'s Frigate was sunk!");
-                break;
-            case 'C':
-                fleet[3].hit();
-                if(fleet[3].isSunk())
-                    System.out.println(name + "'s Cruiser was sunk!");
-                break;
-            case 'A':
-                fleet[4].hit();
-                if(fleet[4].isSunk())
-                    System.out.println(name + "'s Aircraft Carrier was sunk!");
-                break;
-            default:
-                
+        for (int i = 0; i < fleet.length || oldMark == shipTitle; i++) {
+            shipTitle = fleet[i].getTitle();
+            index = i;
         }
-        personalGrid.setSquare(row, col, 'H');
+        
+        fleet[index].hit();
+        if(fleet[index].isSunk()) {
+            System.out.println(name + "'s " + fleet[index].getName() 
+                    + " was sunk!");
+        }
+        else
+            personalGrid.setSquare(row, col, 'H');
     }
     
     public boolean fleetSunk()
