@@ -204,18 +204,19 @@ public class Player {
         return name;
     }
     
-    public void GoodHit(int row, int col)
+    public void updateGuessGrid(int row, int col)
     {
         guessGrid.setSquare(row, col, 'H');
     }
     
-    public void BadHit(int row, int col)
+    public void updatePersonalGrid(int row, int col)
     {
         char oldMark = personalGrid.getSquare(row, col);
         char shipTitle = '0';
         int index = 0;
         
-        for (int i = 0; i < fleet.length || oldMark == shipTitle; i++) {
+        for (int i = 0; i < fleet.length-1 || oldMark == shipTitle; i++) {
+            System.out.println(i + "/" + fleet.length + "ASD");
             shipTitle = fleet[i].getTitle();
             index = i;
         }
@@ -258,5 +259,10 @@ public class Player {
     
     public void promote() {
         rank++;
+    }
+    
+    public String toString()
+    {
+        return this.getName();
     }
 }
