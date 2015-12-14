@@ -18,12 +18,14 @@ public class AiPlayer extends Player {
     private SeaGrid guessGrid = new SeaGrid("Target grid");
 
     private int[] lastAttack = new int[2];
+    private int numConsHits = 0;//remembers the number of hits in a row
+    private int prevDirection = 0;//remembers the previous direction
     private int orientation = 0;
     // 0 = n/a
     // 1 = vertical
     // -1 = horizontal
 
-    private boolean miltiHits = false;
+    private boolean multiHits = false;//if true, continue attack pattern
 
     public AiPlayer(String nameInput) {
         super(nameInput);
@@ -41,8 +43,14 @@ public class AiPlayer extends Player {
         int col = 0;
 
         if (lastAttackHit()) {
+            numConsHits++;
+            if(numConsHits >= 2)
+                multiHits = true;
+            
             controlConsHits(row, col);
+            
         } else {
+            multiHits = false;
             row = rand.nextInt(10);
             col = rand.nextInt(10);
         }
@@ -57,6 +65,7 @@ public class AiPlayer extends Player {
 
     private int nextAttackDirection() {
         int direction = rand.nextInt(4);
+        
         if (orientation == -1) {
             direction = 2;
             direction = 3;
@@ -64,7 +73,10 @@ public class AiPlayer extends Player {
             direction = 0;
             direction = 1;
         }
-        return direction;
+        if(multiHits)
+            return prevDirection;
+        else
+            return direction;
     }
 
     //--------------------------------------------
@@ -91,7 +103,7 @@ public class AiPlayer extends Player {
     //to keep trying that direction.
     //---------------------------------------------------------
     private void controlConsHits(int row, int col) {
-
+        prevDirection = nextAttackDirection();
         int next = nextAttackDirection();
         if (lastAttack[0] > 9 && lastAttack[1] > 9) {
             switch (next) {
