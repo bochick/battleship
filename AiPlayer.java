@@ -7,76 +7,162 @@ package battleship;
 
 import java.util.Random;
 
-
 /**
  *
  * @author Anthony&Brad
  */
 public class AiPlayer extends Player {
+
     private Random rand = new Random();
     private SeaGrid personalGrid;
     private SeaGrid guessGrid = new SeaGrid("Target grid");
-  
+
+   public enum Direction {up, down, left, right}
     private int[] lastAttack = new int[2];
+    private int numConsHits = 0;//remembers the number of hits in a row
+    private Direction prevDirection;//remembers the previous direction
+    private int orientation = 0;
+    // 0 = n/a
+    // 1 = vertical
+    // -1 = horizontal
+
+    private boolean multiHits = false;//if true, continue attack pattern
 
     public AiPlayer(String nameInput) {
         super(nameInput);
     }
-
-    //------------------------------------------
-    //ai players attack() method:
-    //will select a random valid location on the grid
-    //if they have not attacked there before, return row, col
-    //if they have, method will recurse.
-    //------------------------------------------
-    public int[] attack() {
-        int row = 0;
-        int col = 0;
-
-        if (lastAttackHit()) {
-            //------------------NOTES NOT YET COMPLETE-----------------
-            //if next attack hits, chose a direstion to try at random.
-            //"next" will have to be remembered if the attack hits again
-            //to keep trying that direction.
-            //more logic is needed to check if a direction is 
-            //even valid(on the grid)
-            //---------------------------------------------------------
-            int next = nextAttackDirection();
-            switch(next){
-                case 0:{row = lastAttack[1]++; col = lastAttack[0];}//up
-                case 1:{row = lastAttack[1]--; col = lastAttack[0];}//down
-                case 2:{row = lastAttack[1]; col = lastAttack[0]--;}//left
-                case 3:{row = lastAttack[1]; col = lastAttack[0]++;}//right
-            }
+   
+     @Override
+    public void buildGrid(){
+       randomPlacement();
+    }
+    
+    @Override
+    public int[] attack(){
+        int row = rand.nextInt(9);
+        int col = rand.nextInt(9);
+        int[] currentAttack = {row, col};
+        
+        if(multiHits)
+            return lastAttack;
+        else 
+            return lastAttack = currentAttack;
+    }
+    
+    @Override
+   public boolean hitOrMiss(int row, int col) {
+        boolean output = false;
+        multiHits = false;
+        char square = personalGrid.getSquare(row, col);
+        
+        if (square != '^' && square != 'H' && square != 'G'){
+            numConsHits++;
+            output = true;
+            if(numConsHits >= 2)
+                multiHits = true;
         } 
-        else {
-            row = rand.nextInt((10 - 1) + 1) + 1;
-            col = rand.nextInt((10 - 1) + 1) + 1;
-        }
-        if (guessGrid.getSquare(row, col) == '^') {
-            int output[] = {col, row};
-            lastAttack = output;
-            return output;
-        } else {
-            return attack();
-        }
-    }
 
-    private int nextAttackDirection(){
-       int direction = rand.nextInt(3);
-        return direction;
+        return output;
     }
-    //--------------------------------------------
-    //lastAttackHit() used to check if the last
-    //shot fired was a hit.
-    //if it was, apply different logic in attack()
-    //--------------------------------------------
-    private boolean lastAttackHit() {
-        if (hitOrMiss(lastAttack[0], lastAttack[1])) {
-            return true;
-        } else {
-            return false;
-        }
-    }
+   
+   private Direction choseRandomDirection(){
+       int randDirection = rand.nextInt(4);
+       switch (randDirection) {
+                case 0: {
+                   return Direction.up; 
+                }
+                case 1: {
+                    return Direction.down;
+                }
 
+                case 2: {
+                    return Direction.left;
+                }
+                case 3: {
+                    return Direction.right;
+                }
+                default:{
+                    return Direction.up;
+                }
+            }
+    }
+   
+   private Direction inverse(Direction current){
+       switch (current) {
+           case up: {
+                   return Direction.down; 
+                }
+                case down: {
+                    return Direction.up;
+                }
+
+                case left: {
+                    return Direction.right;
+                }
+                case right: {
+                    return Direction.left;
+                }
+                default:{
+                    return current;
+                }
+            }
+   }
+    
+   private void nextAttackDirection(int row, int col){
+       if(multiHits){
+           switch (prevDirection) {
+                case up: {
+                   row = lastAttack[0]--;
+                   col = lastAttack[1];
+                   prevDirection = Direction.up;
+                }
+                case down: {
+                    row = lastAttack[0]++;
+                    col = lastAttack[1];
+                    prevDirection = Direction.down;
+                }
+
+                case left: {
+                    row = lastAttack[0];
+                    col = lastAttack[1]++;
+                    prevDirection = Direction.left;
+                }
+                case right: {
+                    row = lastAttack[0];
+                    col = lastAttack[1]--;
+                     prevDirection = Direction.right;
+                }
+            }
+           lastAttack[0] = row;
+           lastAttack[1] = col;
+       }
+       else{
+           switch (choseRandomDirection()) {
+                case up: {
+                   row = lastAttack[0]--;
+                   col = lastAttack[1];
+                   prevDirection = Direction.up;
+                }
+                case down: {
+                    row = lastAttack[0]++;
+                    col = lastAttack[1];
+                    prevDirection = Direction.down;
+                }
+
+                case left: {
+                    row = lastAttack[0];
+                    col = lastAttack[1]++;
+                    prevDirection = Direction.left;
+                }
+                case right: {
+                    row = lastAttack[0];
+                    col = lastAttack[1]--;
+                     prevDirection = Direction.right;
+                }
+                lastAttack[0] = row;
+                lastAttack[1] = col;
+            }  
+       }
+   }
+  
 }
