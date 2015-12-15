@@ -276,13 +276,14 @@ public class Player {
         char shipTitle = '^';
         int index = 0;
         
-        for (int i = 0; i < fleet.length-1 || oldMark == shipTitle; i++) {
+        for (int i = 0; i < fleet.length || oldMark == shipTitle; i++) {
 //            System.out.println(i + "/" + fleet.length + "ASD");
+            System.out.println(i + "ASD");
             shipTitle = fleet[i].getTitle();
             index = i;
         }
         //if shot is a hit
-        if (oldMark != '^') {
+        if (hitOrMiss(row,col)) {
             fleet[index].hit();
             if(fleet[index].isSunk()) {
                 System.out.println(name + "'s " + fleet[index].getName() 
