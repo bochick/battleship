@@ -202,11 +202,18 @@ public class AiPlayer extends Player {
     //used to change the direction if we know the orientation
     //but still miss
     //-------------------------------------------------
-
     public void changeDirection(boolean missed) {
         if (missed && multiHits) {
-            System.out.println("direction has been inversed");
+            if(prevDirection == Direction.up)
+                lastAttack[0] += numConsHits;
+            else if (prevDirection == Direction.down)
+                lastAttack[0] -= numConsHits;
+            else if (prevDirection == Direction.left)
+                lastAttack[1] += numConsHits;
+            else if (prevDirection == Direction.right)
+                lastAttack[1] -= numConsHits;
             prevDirection = inverse(prevDirection);
+            System.out.println("direction has been inversed");
         }
     }
 
@@ -282,4 +289,7 @@ public class AiPlayer extends Player {
         lastAttack = temp;
     }
 
+    public Direction getDirection(){
+        return prevDirection;
+    }
 }
