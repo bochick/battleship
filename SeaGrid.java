@@ -30,7 +30,7 @@ public class SeaGrid {
     }
     
     public String toString() {
-        String result = name + "\n0\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\n";
+        String result = "\n0\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\n";
 
         for (int row=0; row < SIZE; row++)
         {
