@@ -10,6 +10,7 @@ import java.util.regex.*;
  */
 public class Player {
     
+    public enum Direction { up, down, left, right }
     private Ship[] fleet;
     private String name;
     private SeaGrid personalGrid;
@@ -201,7 +202,7 @@ public class Player {
      */
     public String getPersonalGrid()
     {
-        return personalGrid.toString();
+        return name + "'s Personal Grid:" + personalGrid.toString();
     }
     
     /**
@@ -210,12 +211,12 @@ public class Player {
      */
     public String getTargetGrid()
     {
-        return targetGrid.toString();
+        return name + "'s Target Grid: " + targetGrid.toString();
     }
     
     /**
      * Asks the player what row and column to attack next
-     * @return 
+     * @return row and column as an int array
      */
     public int[] attack(){
         System.out.print("What area would you like to attack? [row] [column]: ");
@@ -223,7 +224,7 @@ public class Player {
         try {
             int row = cin.nextInt() - 1;
             int col = cin.nextInt() - 1;
-            output = new int[] {col, row};
+            output = new int[] {row, col};
             
             return output;
         } catch (Exception error) { 
@@ -238,13 +239,13 @@ public class Player {
      *
      * @param row
      * @param col
-     * @return
+     * @return true if the inputed row and column is a ship
      */
     public boolean hitOrMiss(int row, int col) {
         boolean output = false;
         char square = personalGrid.getSquare(row, col);
         
-        if (square != '^') 
+        if (square != '^' && square != 'H' && square != 'G') 
             output = true;
         
         return output;
