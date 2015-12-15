@@ -34,7 +34,7 @@ public class Player {
         fleet[1] = new Ship("Submarine", 3);
         fleet[2] = new Ship("Frigate", 3);
         fleet[3] = new Ship("Cruiser", 4);
-        fleet[4] = new Ship("Aircraft Carrier", 5);
+        fleet[4] = new Ship("Aircraft_Carrier", 5);
     }
     
     /**
@@ -61,7 +61,7 @@ public class Player {
     }
     
     /**
-     *
+     * @return list of ships, their title and respective size
      */
     private String shipInfo() {
         String printShips = "";
@@ -226,13 +226,12 @@ public class Player {
             int col = cin.nextInt() - 1;
             output = new int[] {row, col};
             
-            return output;
         } catch (Exception error) { 
-            System.out.println("Input error! Defaulting to [row] 1 [column] 1");
-            output = new int[] {0, 0}; 
+            System.out.println("Input error!");
             cin.nextLine();//clears the input
-            return output;
+            output = attack();
         }
+            return output;
     }
     
     /**
@@ -241,11 +240,11 @@ public class Player {
      * @param col
      * @return true if the inputed row and column is a ship
      */
-    public boolean hitOrMiss(int row, int col) {
+    public boolean hit(int row, int col) {
         boolean output = false;
         char square = personalGrid.getSquare(row, col);
         
-        if (square != '^' && square != 'H' && square != 'G') 
+        if (square != '^' || square != 'H' || square != 'G' || square != 'X') 
             output = true;
         
         return output;
@@ -270,29 +269,49 @@ public class Player {
      * @param row
      * @param col
      */
-    public void updatePersonalGrid(int row, int col)
+    public Ship.Enum updatePersonalGrid(int row, int col)
     {
-        char oldMark = personalGrid.getSquare(row, col);
-        char shipTitle = '^';
+        char square = personalGrid.getSquare(row, col);
+        char ship = '^';
         int index = 0;
+        Ship.Enum output = null;
         
-        for (int i = 0; i < fleet.length-1 || oldMark == shipTitle; i++) {
-//            System.out.println(i + "/" + fleet.length + "ASD");
-            shipTitle = fleet[i].getTitle();
+        for (int i = 0; i < fleet.length && square != ship; i++) {
+            ship = fleet[i].getTitle();
             index = i;
         }
+        
         //if shot is a hit
-        if (oldMark != '^') {
+        if (square != '^' && square != 'G') {
             fleet[index].hit();
+            System.out.println("Index: " + index);
+            System.out.println("Ship Hits: "+ fleet[index].getHits());
             if(fleet[index].isSunk()) {
+                personalGrid.setSquare(row, col, 'X');
                 System.out.println(name + "'s " + fleet[index].getName() 
                         + " was sunk!");
+                output = fleet[index].getEnum(); //returns the sunk ship
+                int dir = fleet[index].getDirection();
+                int[] pos = fleet[index].getLocation();
+                for (int i = 0; i < fleet[index].getSize(); i++) {
+                    personalGrid.setSquare(pos[0], pos[1], 'X');
+                    if (dir == 0)//down
+                        pos[0]++;
+                    else if (dir == 1)//up
+                        pos[0]--;
+                    else if (dir == 2)//right
+                        pos[1]++;
+                    else if (dir == 3)//left
+                        pos[1]--;
+                }
             }
             else
                 personalGrid.setSquare(row, col, 'H');
         }
         else //shot is not a hit
             personalGrid.setSquare(row, col, 'G');
+        
+        return output;
     }
     
     /**
