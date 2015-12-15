@@ -284,14 +284,23 @@ public class Player {
         //if shot is a hit
         if (square != '^' && square != 'G') {
             fleet[index].hit();
-            System.out.println("Index: " + index);
-            System.out.println("Ship Hits: "+ fleet[index].getHits());
             if(fleet[index].isSunk()) {
-                personalGrid.setSquare(row, col, 'X');
                 System.out.println(name + "'s " + fleet[index].getName() 
                         + " was sunk!");
                 output = fleet[index].getEnum(); //returns the sunk ship
                 
+                int[] sunk = fleet[index].getLocation();
+                int dir = fleet[index].getDirection();
+                for (int i = 0; i < fleet[index].getSize(); i++) {
+                    personalGrid.setSquare(sunk[0], sunk[1], 'X');
+                    if (dir == 0)//down
+                        sunk[0]++;
+                    else if (dir == 1)//up
+                        sunk[0]--;
+                    else if (dir == 2)//right
+                        sunk[1]++;
+                    else if (dir == 3)//left
+                        sunk[1]--;                }
             }
             else
                 personalGrid.setSquare(row, col, 'H');
