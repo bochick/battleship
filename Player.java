@@ -1,37 +1,34 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package battleship;
 
 import java.util.Random;
+import java.util.Scanner;
+import java.util.regex.*;
 
 /**
  *
- * @author Anthony&Brad
+ * @author JM
  */
-public class AiPlayer extends Player {
-
+public class Player {
+    
+    public enum Direction { up, down, left, right }
     private Ship[] fleet;
-    private Random rand = new Random();
+    private String name;
     private SeaGrid personalGrid;
-    private SeaGrid targetGrid = new SeaGrid("Target grid");
-
-    private int[] lastAttack = new int[2];
-    private int[] temp = new int[2];
-    private int numConsHits = 0;//remembers the number of hits in a row
-    private int adjacentAttacks;
-    private Direction prevDirection;//remembers the previous direction
-
-    private boolean multiHits = false;//if true, continue attack pattern
-    private boolean lastAttackHit;
-
-    public AiPlayer(String nameInput) {
-        super(nameInput);
-        personalGrid = new SeaGrid(nameInput + "\'s grid");
-        lastAttackHit = false;
-        adjacentAttacks = 0;
+    private SeaGrid targetGrid = new SeaGrid("Target grid");;
+    private int rank;
+    
+    private Scanner cin = new Scanner(System.in);
+    private Random rand = new Random(); 
+   
+    /**
+     *
+     * @param nameInput
+     */
+    public Player(String nameInput) {
+        name = nameInput;
+        personalGrid = new SeaGrid(name + "\'s grid");
+        rank = 1;
+        
         fleet = new Ship[5];
         fleet[0] = new Ship("Destroyer", 2);
         fleet[1] = new Ship("Submarine", 3);
@@ -39,242 +36,309 @@ public class AiPlayer extends Player {
         fleet[3] = new Ship("Cruiser", 4);
         fleet[4] = new Ship("Aircraft Carrier", 5);
     }
-
-    @Override
+    
+    /**
+     * Asks the player if he/she wants to position the ships manually
+     * Only accepts y,Y or n,N as an answer
+     */
     public void buildGrid() {
-        randomPlacement();
-    }
-
-    //-------------------------------------------------
-    //attack() returns the cordinates of the ai's attack
-    //if the ai has no previous hits, attack at random
-    //otherwise call nextAttack() if the last attack hit
-    //-------------------------------------------------
-
-    @Override
-    public int[] attack() {
-        int row = rand.nextInt(9);
-        int col = rand.nextInt(9);
-        int[] currentAttack = {row, col};
-
-        if (lastAttackHit) {
-            adjacentAttacks++;
-            System.out.println("ai got into lastattackhit, multihits is " + multiHits);
-            System.out.println("num of cons hits: " + numConsHits);
-            return nextAttack();
-        } else {
-            System.out.println("ai did not get into lastattackhit");
-            return lastAttack = currentAttack;
+        String input;
+        
+        System.out.print("Do you want to position your ships manually? [Y] [N]: ");
+        input = cin.next();
+        cin.nextLine();//clears the input
+        
+        if (input.equalsIgnoreCase("N")) {
+            randomPlacement();
+        }
+        else if (input.equalsIgnoreCase("Y")) {
+            playerPlace();
+        }
+        else {
+            System.out.print("Unknown command... ");
+            buildGrid();
         }
     }
-
-    //-------------------------------------------------
-    //chose a direction at random by using a random number
-    //0 = up
-    //1 = down
-    //2 = left
-    //3 = right
-    //is up by default
-    //-------------------------------------------------
-    private Direction choseRandomDirection() {
-        int randDirection = rand.nextInt(4);
-        switch (randDirection) {
-            case 0: {
-                return Direction.up;
+    
+    /**
+     *
+     */
+    private String shipInfo() {
+        String printShips = "";
+        //prints out the list of ships to place
+        for (Ship fleet1 : fleet) {
+            printShips += "[" + fleet1.getTitle() + "]" + fleet1.getName() 
+                    + "(" + fleet1.getSize() + ") ";
+        }
+        
+        return printShips;
+    }
+    
+    /**
+     * Manually places the players ships on the personal SeaGrid
+     */
+    private void playerPlace() {
+        int shipIndex = 0;
+        String printShips = shipInfo();
+        
+        System.out.println(printShips + "\n" + "[U]Up [D]Down [L]Left [R]Right");
+        System.out.print(personalGrid);
+        
+        //cycles through the array of ships
+        while (shipIndex < fleet.length) { 
+            printShips = fleet[shipIndex] +  ": [row] [column] [direction]";
+            
+            System.out.println(printShips);
+            String input = cin.nextLine();
+           
+            // makes sure the input matches the criteria: [row] [column] [direction]
+            while (!Pattern.matches("[0-9]{1,} [0-9]{1,} [u|U|d|D|l|L|r|R]?", input)) {
+                System.out.println("Incorrect format entry.\n" + printShips);
+                input = cin.nextLine();
             }
-            case 1: {
-                return Direction.down;
+            //breakes the input into an array
+            String arr[] = input.split(" "); 
+            //processes the array according to the inputs
+            int row = Integer.parseInt(arr[0]) - 1;
+            int col = Integer.parseInt(arr[1]) - 1;
+            int dir = charToIntDir(arr[2].toUpperCase().charAt(0));
+            
+            //if ship position is valid
+            if (validPlacement(row, col, dir, fleet[shipIndex].getSize())) {
+                for (int i = 0; i < fleet[shipIndex].getSize(); i++) {
+                    //places ship
+                    personalGrid.setSquare(row, col, fleet[shipIndex].getTitle());
+                    if (dir == 0)//down
+                        row++;
+                    else if (dir == 1)//up
+                        row--;
+                    else if (dir == 2)//right
+                        col++;
+                    else if (dir == 3)//left
+                        col--;
+                }
+                shipIndex++;//next ship
             }
-
-            case 2: {
-                return Direction.left;
-            }
-            case 3: {
-                return Direction.right;
-            }
-            default: {
-                return Direction.up;
-            }
+            else 
+                System.out.println("Invalid ship position.");
         }
     }
-
-    //-------------------------------------------------
-    //used to get the inverse of the current direction
-    //-------------------------------------------------
-
-    private Direction inverse(Direction current) {
-        switch (current) {
-            case up: {
-                return Direction.down;
-            }
-            case down: {
-                return Direction.up;
-            }
-
-            case left: {
-                return Direction.right;
-            }
-            case right: {
-                return Direction.left;
-            }
-            default: {
-                return current;
-            }
-        }
+    
+    /**
+     * Takes in a character "D, U, R or L" and provides a direction in as an int
+     * Default placement is down
+     */
+    private int charToIntDir(char in) {
+        if (in == 'D') //down
+            return 0;
+        else if (in == 'U') //up
+            return 1;
+        else if (in == 'R') //right
+            return 2;
+        else if (in == 'L') //left
+            return 3;
+        else //failsafe down
+            return 0;
     }
-
-    //--------------------------------------------------------------------------
-    //nextAttack returns the cordinates of the next attack ai will make
-    //also sets multiHits to true if ai has landed atleast 2 attacks in a row
-    //checks if the direction is valid on the grid, if not inverse the direction
-    //--------------------------------------------------------------------------
-
-    private int[] nextAttack() {
-        temp = lastAttack;
-        if (numConsHits >= 2) {
-            multiHits = true;
-        }
-
-        if (multiHits) {
-            switch (prevDirection) {
-                case up: {
-                    lastAttack[0]--;
-                    prevDirection = Direction.up;
+    
+    /**
+     * Randomly places the ships on the personal SeaGrid
+     */
+    protected void randomPlacement() {
+        int index = fleet.length - 1;
+        
+        while (index >= 0) {
+            int row = rand.nextInt(10);
+            int col = rand.nextInt(10);
+            int dir = rand.nextInt(4);
+                
+            if (validPlacement(row, col, dir, fleet[index].getSize())) {
+                fleet[index].setLocation(col, row);
+                fleet[index].setDirection(dir);
+                for (int i = 0; i < fleet[index].getSize(); i++) {
+                    personalGrid.setSquare(row, col, fleet[index].getTitle());
+                if (dir == 0)//down
+                    row++;
+                else if (dir == 1)//up
+                    row--;
+                else if (dir == 2)//right
+                    col++;
+                else if (dir == 3)//left
+                    col--;
                 }
-                case down: {
-                    lastAttack[0]++;
-                    prevDirection = Direction.down;
-                }
-
-                case left: {
-                    lastAttack[1]--;
-                    prevDirection = Direction.left;
-                }
-                case right: {
-                    lastAttack[1]++;
-                    prevDirection = Direction.right;
-                }
-            }
-            if (isValidAttack(lastAttack[0], lastAttack[1])) {
-                return lastAttack;
-            } else {
-                prevDirection = inverse(prevDirection);
-                return nextAttack();
-            }
-        } else {
-            Direction tempDir = choseRandomDirection();
-            System.out.println(tempDir);
-            switch (tempDir) {
-                case up: {
-                    lastAttack[0]--;
-                    prevDirection = Direction.up;
-                }
-                case down: {
-                    lastAttack[0]++;
-                    prevDirection = Direction.down;
-                }
-
-                case left: {
-                    lastAttack[1]--;
-                    prevDirection = Direction.left;
-                }
-                case right: {
-                    lastAttack[1]++;
-                    prevDirection = Direction.right;
-                }
-            }
-            if (isValidAttack(lastAttack[0], lastAttack[1])) {
-                return lastAttack;
-            } else {
-                return nextAttack();
+                index--;
             }
         }
     }
-
-    //-------------------------------------------------
-    //***** to be used in battleShipGame ******
-    //*****************************************
-    //-------------------------------------------------
-    //used to change the direction if we know the orientation
-    //but still miss
-    //-------------------------------------------------
-
-    public void changeDirection() {
-        if (!hitOrMiss(lastAttack[0], lastAttack[1]) && multiHits) {
-            prevDirection = inverse(prevDirection);
+    
+    /**
+     * Checks if the placement of the ship on the personal SeaGrid is valid
+     * Returns false if otherwise
+     */
+    private boolean validPlacement(int row, int col, int dir, int size) {
+        try {
+        boolean valid = true;
+        for (int i = 0; i < size; i++) {
+                if (personalGrid.getSquare(row, col) != '^') 
+                        valid = false;
+                if (dir == 0)//down
+                    row++;
+                else if (dir == 1)//up
+                    row--;
+                else if (dir == 2)//right
+                    col++;
+                else if (dir == 3)//left
+                    col--;
+            }
+                return valid;
+        } catch (ArrayIndexOutOfBoundsException error) {
+            return false;//if the ship goes off the board
         }
     }
-
-    public void setLastAttackHit(boolean hit) {
-        lastAttackHit = hit;
+    
+    /**
+     *
+     * @return PersonalGrid
+     */
+    public String getPersonalGrid()
+    {
+        return name + "'s Personal Grid:" + personalGrid.toString();
     }
-
-    //-------------------------------------------------
-    //checks to make sure the attack is within the grid
-    //-------------------------------------------------
-
-    private boolean isValidAttack(int row, int col) {
-        if (row < 10 || col < 10) {
+    
+    /**
+     *
+     * @return TargetGrid
+     */
+    public String getTargetGrid()
+    {
+        return name + "'s Target Grid: " + targetGrid.toString();
+    }
+    
+    /**
+     * Asks the player what row and column to attack next
+     * @return row and column as an int array
+     */
+    public int[] attack(){
+        System.out.print("What area would you like to attack? [row] [column]: ");
+        int[] output;
+        try {
+            int row = cin.nextInt() - 1;
+            int col = cin.nextInt() - 1;
+            output = new int[] {row, col};
+            
+            return output;
+        } catch (Exception error) { 
+            System.out.println("Input error! Defaulting to [row] 1 [column] 1");
+            output = new int[] {0, 0}; 
+            cin.nextLine();//clears the input
+            return output;
+        }
+    }
+    
+    /**
+     *
+     * @param row
+     * @param col
+     * @return true if the inputed row and column is a ship
+     */
+    public boolean hitOrMiss(int row, int col) {
+        boolean output = false;
+        char square = personalGrid.getSquare(row, col);
+        
+        if (square != '^' && square != 'H' && square != 'G') 
+            output = true;
+        
+        return output;
+    }
+    
+    /**
+     *
+     * @param row
+     * @param col
+     * @param hit
+     */
+    public void updateGuessGrid(int row, int col, boolean hit)
+    {
+        if (hit)
+            targetGrid.setSquare(row, col, 'H');
+        else
+            targetGrid.setSquare(row, col, 'G');
+    }
+    
+    /**
+     *
+     * @param row
+     * @param col
+     */
+    public void updatePersonalGrid(int row, int col)
+    {
+        char oldMark = personalGrid.getSquare(row, col);
+        char shipTitle = '^';
+        int index = 0;
+        
+        for (int i = 0; i < fleet.length-1 || oldMark == shipTitle; i++) {
+//            System.out.println(i + "/" + fleet.length + "ASD");
+            shipTitle = fleet[i].getTitle();
+            index = i;
+        }
+        //if shot is a hit
+        if (oldMark != '^') {
+            fleet[index].hit();
+            if(fleet[index].isSunk()) {
+                System.out.println(name + "'s " + fleet[index].getName() 
+                        + " was sunk!");
+            }
+            else
+                personalGrid.setSquare(row, col, 'H');
+        }
+        else //shot is not a hit
+            personalGrid.setSquare(row, col, 'G');
+    }
+    
+    /**
+     *
+     * @return
+     */
+    public boolean fleetSunk()
+    {
+        if( fleet[0].isSunk() && 
+            fleet[1].isSunk() &&
+            fleet[2].isSunk() &&
+            fleet[3].isSunk() &&
+            fleet[4].isSunk()   )
             return true;
-        } else {
-            return false;
-        }
-
+        
+        return false;
     }
-   //-----------------------------------------
-    //***** to be used in battleShipGame ******
-    //*****************************************
-    //-----------------------------------------
-    //checks if the ai has landed multiple hits
-    //-----------------------------------------
-
-    public boolean hasMultiHits() {
-        return multiHits;
+    
+    public String getRank() {
+        if (rank == 1)
+            return "Ensign";
+        else if (rank == 2)
+            return "Lieutenant";
+        else if (rank == 3)
+            return "Commander";
+        else if (rank == 4)
+            return "Captain";
+        else if (rank == 5)
+            return "Admiral";
+        else 
+            return "Fleet Admiral";
     }
-
-   //-----------------------------------------
-    //***** to be used in battleShipGame ******
-    //*****************************************
-    //-----------------------------------------
-    //chekcs the number of adjacent attacks
-    //used so the ai will check all 4 adjacent
-    //squares in the worse case
-    //-----------------------------------------
-    public int getAdjacentAttacks() {
-        return adjacentAttacks;
+    
+    /**
+     *
+     */
+    public void promote() {
+        rank++;
     }
-   //-----------------------------------------
-    //***** to be used in battleShipGame ******
-    //*****************************************
-    //-----------------------------------------
-    //used to add to or reset the number of
-    //cons hits
-    //-----------------------------------------
-
-    public void setNumConsHits(int n) {
-        numConsHits = n;
+    
+    /**
+     *
+     * @return
+     */
+    public String toString()
+    {
+        return name;
     }
-   //-----------------------------------------
-    //***** to be used in battleShipGame ******
-    //*****************************************
-    //-----------------------------------------
-    //used to get the current number of cons hits
-    //-----------------------------------------
-
-    public int getNumConsHits() {
-        return numConsHits;
-    }
-   //-----------------------------------------
-    //***** to be used in battleShipGame ******
-    //*****************************************
-    //-----------------------------------------
-    //used to reset last attack after missing
-    //when attacking an adjacent square. only
-    //up to 4 times
-    //-----------------------------------------
-
-    public void resetLastAttack() {
-        lastAttack = temp;
-    }
-
 }
