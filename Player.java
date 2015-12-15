@@ -225,7 +225,7 @@ public class Player {
             int row = cin.nextInt() - 1;
             int col = cin.nextInt() - 1;
             output = new int[] {row, col};
-            
+            hit(row, col);
         } catch (Exception error) { 
             System.out.println("Input error!");
             cin.nextLine();//clears the input
