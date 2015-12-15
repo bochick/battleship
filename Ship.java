@@ -8,7 +8,7 @@ public class Ship {
     private int size;
     private int hits;
     private int direction;
-    private int[] location;
+    private int[] location = new int[2];
     
     public Ship (String nameIn, int sizeIn) {
         name = nameIn;
@@ -52,7 +52,7 @@ public class Ship {
         return false;
     }
     
-    public char title() {
+    public char getTitle() {
         return name.charAt(0);
     }
     
