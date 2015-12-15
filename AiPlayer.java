@@ -99,6 +99,14 @@ public class AiPlayer extends Player {
             }
         }
     }
+    
+    public void reportSunkenShip()
+    {
+        //Stuff for going back and checking for other hits goes here
+        setMultiHits(false);
+        setNumConsHits(0);
+        setLastAttackHit(false);
+    }
     //-------------------------------------------------
     //used to get the inverse of the current direction
     //-------------------------------------------------
