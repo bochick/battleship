@@ -104,25 +104,18 @@ public class AiPlayer extends Player {
     //-------------------------------------------------
 
     private Direction inverse(Direction current) {
-        switch (current) {
-            case up: {
-                return Direction.down;
-            }
-            case down: {
-                return Direction.up;
-            }
-
-            case left: {
-                return Direction.right;
-            }
-            case right: {
+        if(current == Direction.up)
+            return Direction.down;
+        else if(current == Direction.down)
+            return Direction.up;
+        else if(current == Direction.left)
+            return Direction.right;
+        else if (current == Direction.right)        
                 return Direction.left;
-            }
-            default: {
-                return current;
-            }
+        else
+            return current;
         }
-    }
+    
 
     //--------------------------------------------------------------------------
     //nextAttack returns the cordinates of the next attack ai will make
@@ -166,7 +159,6 @@ public class AiPlayer extends Player {
                 return nextAttack();
             }
         } else {
-
             switch (choseRandomDirection()) {
                 case up: {
                     lastAttack[0]--;
@@ -197,6 +189,7 @@ public class AiPlayer extends Player {
             if (isValidAttack(lastAttack[0], lastAttack[1])) {
                 return lastAttack;
             } else {
+                prevDirection = inverse(prevDirection);
                 return nextAttack();
             }
         }
@@ -212,6 +205,7 @@ public class AiPlayer extends Player {
 
     public void changeDirection(boolean missed) {
         if (missed && multiHits) {
+            System.out.println("direction has been inversed");
             prevDirection = inverse(prevDirection);
         }
     }
@@ -225,7 +219,7 @@ public class AiPlayer extends Player {
     //-------------------------------------------------
 
     private boolean isValidAttack(int row, int col) {
-        if (row < 10 || col < 10) {
+        if (row < 10 && col < 10 && row > -1 && col > -1) {
             return true;
         } else {
             return false;
