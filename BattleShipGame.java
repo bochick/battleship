@@ -43,37 +43,54 @@ public class BattleShipGame {
         System.out.print(player.getTargetGrid());
         
         int[] coordinates = player.attack();
-        boolean shot = ai.hitOrMiss(coordinates[0], coordinates[1]);
-        
+        boolean shot = ai.hit(coordinates[0], coordinates[1]);
         player.updateGuessGrid(coordinates[0], coordinates[1], shot);
-        ai.updatePersonalGrid(coordinates[0], coordinates[1]);
+        Ship.Enum ship = ai.updatePersonalGrid(coordinates[0], coordinates[1]);
         
         if (shot) {
             Toolkit.getDefaultToolkit().beep();
             System.out.println(player + ", you've landed a shot!");
+            if (ship != null) {
+                System.out.println(player + " you have sunk " + ship);
+                player.promote();
+            }
         } else {
             System.out.println(player + ", you've missed a shot.");
         }
+        
     }
 
     private void aiTurn() {
         System.out.print(ai.getPersonalGrid());
         System.out.println(new String(new char[82]).replace("\0", "-"));
-        System.out.print(ai.getTargetGrid());
         
         int[] coordinates = ai.attack();
-        boolean shot = player.hitOrMiss(coordinates[0], coordinates[1]);
+        boolean shot = player.hit(coordinates[0], coordinates[1]);
         ai.updateGuessGrid(coordinates[0], coordinates[1], shot);
-        
-        ai.updateGuessGrid(coordinates[0], coordinates[1], shot);
-        player.updatePersonalGrid(coordinates[0], coordinates[1]);
+        Ship.Enum ship = player.updatePersonalGrid(coordinates[0], coordinates[1]);
         
         if (shot) {
+            ai.setLastAttackHit(true);
+            ai.setNumConsHits(ai.getNumConsHits() + 1);
             Toolkit.getDefaultToolkit().beep();
-            System.out.println("AI, " + ai + " hit one of your ships at " 
-                    + "[row]" + (coordinates[0] + 1) 
-                    + " [column]" + (coordinates[1] + 1) + "!");
+            
+            if (ship != null) {
+                System.out.println(ai + " sunk " + ship);
+            }
+            else {
+                    System.out.println("AI, " + ai + " hit one of your ships at " 
+                        + "[row]" + (coordinates[0] + 1) 
+                        + " [column]" + (coordinates[1] + 1) + "!");
+            }
         } else {
+            if(ai.hasMultiHits()){
+                ai.changeDirection(shot);
+            }
+            else if(ai.getAdjacentAttacks() >= 4){
+                ai.setNumConsHits(0);
+                ai.setLastAttackHit(false);
+            }
+                
             System.out.println("AI, " + ai + " missed your ships at "
                     + "[row]" + (coordinates[0] + 1) 
                     + " [column]" + (coordinates[1] + 1) + "!");
