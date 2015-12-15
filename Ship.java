@@ -4,16 +4,21 @@ package battleship;
  * @author John Miller
  */
 public class Ship {
+    public enum Enum {Destroyer, Submarine, Frigate, Cruiser, Aircraft_Carrier}
+    
     private String name;
     private int size;
     private int hits;
     private int direction;
     private int[] location = new int[2];
+    private Enum enValue;
     
     public Ship (String nameIn, int sizeIn) {
         name = nameIn;
         size = sizeIn;
         hits = 0;
+        
+        enValue = Enum.valueOf(name);
     }
     
     public String getName() {
@@ -33,8 +38,8 @@ public class Ship {
     }
     
     public void setLocation(int x, int y) {
-        location[0] = y;
-        location[1] = x;
+        location[0] = x;
+        location[1] = y;
     }
     
     public void setDirection(int dir) {
@@ -54,6 +59,14 @@ public class Ship {
     
     public char getTitle() {
         return name.charAt(0);
+    }
+    
+    public Enum getEnum() {
+        return enValue;
+    }
+    
+    public int getHits() {
+        return hits;
     }
     
     public String toString() {
