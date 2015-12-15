@@ -1,6 +1,7 @@
 package battleship;
 
 import java.util.Scanner;
+import java.awt.*;
 
 /**
  *
@@ -18,8 +19,9 @@ public class BattleShipGame {
 
         player = new Player(input);
         ai = new AiPlayer("Marvin");
+        
         System.out.println("Welcome to Battle Ship " + player.getRank() + " "
-                + player.getName() + "! Prepare for combat.");
+                + player + "! Prepare for combat.");
     }
 
     public void play() {
@@ -27,40 +29,45 @@ public class BattleShipGame {
         ai.buildGrid();
 
         do {
-
             playerTurn();
             aiTurn();
-
         } while (!player.fleetSunk() && !ai.fleetSunk());
     }
 
     private void playerTurn() {
-        System.out.println(player.getName() + "'s Personal Grid:"
-                + player.getPersonal());
-        System.out.println("\n--------------------------------------------------"
-                + "----------\n\n" + player.getName() + "'s Target Grid:"
-                + player.getGuess());
+        System.out.print(player + "'s Personal Grid:" + player.getPersonalGrid());
+        System.out.println("--------------------------------------------------"
+                + "--------------------------------------\n" + player 
+                + "'s Target Grid: " + player.getTargetGrid());
+        
         int[] coordinates = player.attack();
-        char shot = ai.hitOrMiss(coordinates[0], coordinates[1]);
-        player.updateGuessGrid(coordinates[0], coordinates[1]);
-        ai.updatePersonalGrid(coordinates[0], coordinates[1]);
-        if (shot != '^') {
+        boolean shot = ai.hitOrMiss(coordinates[0], coordinates[1]);
+        player.updateGuessGrid(coordinates[0], coordinates[1], shot);
+        
+        if (shot) {
+            Toolkit.getDefaultToolkit().beep();
             System.out.println(player + ", you've landed a shot!");
         } else {
             System.out.println(player + ", you've missed a shot.");
         }
-
+        
+        ai.updatePersonalGrid(coordinates[0], coordinates[1]);
     }
 
     private void aiTurn() {
         int[] coordinates = ai.attack();
-        char shot = ai.hitOrMiss(coordinates[0], coordinates[1]);
-        ai.updateGuessGrid(coordinates[0], coordinates[1]);
-        player.updatePersonalGrid(coordinates[0], coordinates[1]);
-        if (shot != '^') {
-            System.out.println("AI, " + ai + " hit one of your ships!");
+        boolean shot = ai.hitOrMiss(coordinates[0], coordinates[1]);
+        ai.updateGuessGrid(coordinates[0], coordinates[1], shot);
+        
+        if (shot) {
+            Toolkit.getDefaultToolkit().beep();
+            System.out.println("AI, " + ai + " hit one of your ships at " 
+                    + (coordinates[0] + 1) + " " + (coordinates[0] + 1) + "!");
         } else {
-            System.out.println("AI, " + ai + " missed one of your ships!");
+            System.out.println("AI, " + ai + " missed your ships at "
+                    + (coordinates[0] + 1) + " " + (coordinates[0] + 1) + "!");
         }
+        
+        player.updatePersonalGrid(coordinates[0], coordinates[1]);
     }
 }
