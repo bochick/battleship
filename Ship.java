@@ -1,62 +1,45 @@
 package battleship;
 
 /**
- * @author John Miller
+ *
+ * @author 
  */
-public class Ship {
-    private String name;
-    private int size;
-    private int hits;
-    private int direction;
-    private int[] location = new int[2];
+public class SeaGrid {
     
-    public Ship (String nameIn, int sizeIn) {
+    private final int SIZE = 10;
+    private char[][] grid = new char[SIZE][SIZE];
+    private final char open = '^';
+    String name;
+    
+    public SeaGrid(String nameIn) {
         name = nameIn;
-        size = sizeIn;
-        hits = 0;
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                grid[i][j] = open;
+            }
+        }
     }
     
-    public String getName() {
-        return name;
+    public void setSquare(int row, int col, char mark)
+    {
+        grid[row][col] = mark; 
     }
     
-    public int getSize() {
-        return size;
-    }
-    
-    public int[] getLocation() { 
-        return location;
-    }
-    
-    public int getDirection() {
-        return direction;
-    }
-    
-    public void setLocation(int x, int y) {
-        location[0] = y;
-        location[1] = x;
-    }
-    
-    public void setDirection(int dir) {
-        direction = dir;
-    }
-    
-    public void hit() {
-        hits++;
-    }
-    
-    public boolean isSunk() {
-        if (size == hits)
-            return true;
-        
-        return false;
-    }
-    
-    public char getTitle() {
-        return name.charAt(0);
+    public char getSquare(int row, int col) {
+        return grid[row][col];
     }
     
     public String toString() {
-        return name;
+        String result = "\n0\t1\t2\t3\t4\t5\t6\t7\t8\t9\t10\n";
+
+        for (int row=0; row < SIZE; row++)
+        {
+            result += (row + 1) + "\t";
+            for (int col=0; col < SIZE; col++)
+                result += grid[row][col] + "\t";
+            result += "\n";
+        }
+        
+        return result;
     }
 }
