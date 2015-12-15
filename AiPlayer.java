@@ -50,7 +50,6 @@ public class AiPlayer extends Player {
     //if the ai has no previous hits, attack at random
     //otherwise call nextAttack() if the last attack hit
     //-------------------------------------------------
-
     @Override
     public int[] attack() {
         int row = rand.nextInt(9);
@@ -136,25 +135,28 @@ public class AiPlayer extends Player {
         if (numConsHits >= 2) {
             multiHits = true;
         }
-
         if (multiHits) {
             switch (prevDirection) {
                 case up: {
                     lastAttack[0]--;
                     prevDirection = Direction.up;
+                    break;
                 }
                 case down: {
                     lastAttack[0]++;
                     prevDirection = Direction.down;
+                    break;
                 }
 
                 case left: {
                     lastAttack[1]--;
                     prevDirection = Direction.left;
+                    break;
                 }
                 case right: {
                     lastAttack[1]++;
                     prevDirection = Direction.right;
+                    break;
                 }
             }
             if (isValidAttack(lastAttack[0], lastAttack[1])) {
@@ -164,25 +166,32 @@ public class AiPlayer extends Player {
                 return nextAttack();
             }
         } else {
-            Direction tempDir = choseRandomDirection();
-            System.out.println(tempDir);
-            switch (tempDir) {
+
+            switch (choseRandomDirection()) {
                 case up: {
                     lastAttack[0]--;
                     prevDirection = Direction.up;
+                    System.out.println(prevDirection);
+                    break;
                 }
                 case down: {
                     lastAttack[0]++;
                     prevDirection = Direction.down;
+                    System.out.println(prevDirection);
+                    break;
                 }
 
                 case left: {
                     lastAttack[1]--;
                     prevDirection = Direction.left;
+                    System.out.println(prevDirection);
+                    break;
                 }
                 case right: {
                     lastAttack[1]++;
                     prevDirection = Direction.right;
+                    System.out.println(prevDirection);
+                    break;
                 }
             }
             if (isValidAttack(lastAttack[0], lastAttack[1])) {
