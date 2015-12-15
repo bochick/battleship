@@ -13,16 +13,20 @@ public class Player {
     private Ship[] fleet;
     private String name;
     private SeaGrid personalGrid;
-    private SeaGrid guessGrid = new SeaGrid("Target grid");;
+    private SeaGrid targetGrid = new SeaGrid("Target grid");;
     private int rank;
     
     private Scanner cin = new Scanner(System.in);
     private Random rand = new Random(); 
    
+    /**
+     *
+     * @param nameInput
+     */
     public Player(String nameInput) {
         name = nameInput;
-        rank = 1;
         personalGrid = new SeaGrid(name + "\'s grid");
+        rank = 1;
         
         fleet = new Ship[5];
         fleet[0] = new Ship("Destroyer", 2);
@@ -32,6 +36,10 @@ public class Player {
         fleet[4] = new Ship("Aircraft Carrier", 5);
     }
     
+    /**
+     * Asks the player if he/she wants to position the ships manually
+     * Only accepts y,Y or n,N as an answer
+     */
     public void buildGrid() {
         String input;
         
@@ -41,11 +49,9 @@ public class Player {
         
         if (input.equalsIgnoreCase("N")) {
             randomPlacement();
-            System.out.println(personalGrid);
         }
         else if (input.equalsIgnoreCase("Y")) {
             playerPlace();
-            System.out.println(personalGrid);
         }
         else {
             System.out.print("Unknown command... ");
@@ -53,21 +59,27 @@ public class Player {
         }
     }
     
+    /**
+     *
+     */
     private String shipInfo() {
         String printShips = "";
         //prints out the list of ships to place
-        for (int i = 0; i < fleet.length; i++) 
-            printShips += "["+ fleet[i].getTitle() + "]" + fleet[i].getName() 
-                    + "(" + fleet[i].getSize() + ") ";
+        for (Ship fleet1 : fleet) {
+            printShips += "[" + fleet1.getTitle() + "]" + fleet1.getName() 
+                    + "(" + fleet1.getSize() + ") ";
+        }
         
         return printShips;
     }
     
+    /**
+     * Manually places the players ships on the personal SeaGrid
+     */
     private void playerPlace() {
         int shipIndex = 0;
         String printShips = shipInfo();
         
-
         System.out.println(printShips + "\n" + "[U]Up [D]Down [L]Left [R]Right");
         System.out.print(personalGrid);
         
@@ -83,14 +95,14 @@ public class Player {
                 System.out.println("Incorrect format entry.\n" + printShips);
                 input = cin.nextLine();
             }
-            String arr[] = input.split(" "); //breakes the input into an array
-
+            //breakes the input into an array
+            String arr[] = input.split(" "); 
+            //processes the array according to the inputs
             int row = Integer.parseInt(arr[0]) - 1;
             int col = Integer.parseInt(arr[1]) - 1;
-            //third array element String
             int dir = charToIntDir(arr[2].toUpperCase().charAt(0));
             
-            //if ship position is not invalid
+            //if ship position is valid
             if (validPlacement(row, col, dir, fleet[shipIndex].getSize())) {
                 for (int i = 0; i < fleet[shipIndex].getSize(); i++) {
                     //places ship
@@ -111,6 +123,10 @@ public class Player {
         }
     }
     
+    /**
+     * Takes in a character "D, U, R or L" and provides a direction in as an int
+     * Default placement is down
+     */
     private int charToIntDir(char in) {
         if (in == 'D') //down
             return 0;
@@ -124,6 +140,9 @@ public class Player {
             return 0;
     }
     
+    /**
+     * Randomly places the ships on the personal SeaGrid
+     */
     protected void randomPlacement() {
         int index = fleet.length - 1;
         
@@ -151,6 +170,10 @@ public class Player {
         }
     }
     
+    /**
+     * Checks if the placement of the ship on the personal SeaGrid is valid
+     * Returns false if otherwise
+     */
     private boolean validPlacement(int row, int col, int dir, int size) {
         try {
         boolean valid = true;
@@ -172,64 +195,109 @@ public class Player {
         }
     }
     
-    public String getPersonal()    // if u no wat i mean ;)
+    /**
+     *
+     * @return PersonalGrid
+     */
+    public String getPersonalGrid()
     {
         return personalGrid.toString();
     }
     
-    public String getGuess()
+    /**
+     *
+     * @return TargetGrid
+     */
+    public String getTargetGrid()
     {
-        return guessGrid.toString();
+        return targetGrid.toString();
     }
     
+    /**
+     * Asks the player what row and column to attack next
+     * @return 
+     */
     public int[] attack(){
         System.out.print("What area would you like to attack? [row] [column]: ");
-        int row = cin.nextInt() - 1;
-        int col = cin.nextInt() - 1;
+        int[] output;
+        try {
+            int row = cin.nextInt() - 1;
+            int col = cin.nextInt() - 1;
+            output = new int[] {col, row};
+            
+            return output;
+        } catch (Exception error) { 
+            System.out.println("Input error! Defaulting to [row] 1 [column] 1");
+            output = new int[] {0, 0}; 
+            
+            return output;
+        }
+    }
+    
+    /**
+     *
+     * @param row
+     * @param col
+     * @return
+     */
+    public boolean hitOrMiss(int row, int col) {
+        boolean output = false;
+        char square = personalGrid.getSquare(row, col);
         
-        int output[] = {col, row};
+        if (square != '^') 
+            output = true;
         
         return output;
     }
     
-    public char hitOrMiss(int row, int col) {
-        char square = personalGrid.getSquare(row, col);
-        if (square != '^') 
-            return square;
-        else
-            return '^';
-    }
-    
-    public String getName() {
-        return name;
-    }
-    
-    public void updateGuessGrid(int row, int col)
+    /**
+     *
+     * @param row
+     * @param col
+     * @param hit
+     */
+    public void updateGuessGrid(int row, int col, boolean hit)
     {
-        guessGrid.setSquare(row, col, 'H');
+        if (hit)
+            targetGrid.setSquare(row, col, 'H');
+        else
+            targetGrid.setSquare(row, col, 'G');
     }
     
+    /**
+     *
+     * @param row
+     * @param col
+     */
     public void updatePersonalGrid(int row, int col)
     {
         char oldMark = personalGrid.getSquare(row, col);
-        char shipTitle = '0';
+        char shipTitle = '^';
         int index = 0;
         
         for (int i = 0; i < fleet.length-1 || oldMark == shipTitle; i++) {
-            System.out.println(i + "/" + fleet.length + "ASD");
+//            System.out.println(i + "/" + fleet.length + "ASD");
             shipTitle = fleet[i].getTitle();
             index = i;
         }
-        
-        fleet[index].hit();
-        if(fleet[index].isSunk()) {
-            System.out.println(name + "'s " + fleet[index].getName() 
-                    + " was sunk!");
+        //if shot is a hit
+        if (oldMark != '^') {
+            fleet[index].hit();
+            if(fleet[index].isSunk()) {
+                System.out.println(name + "'s " + fleet[index].getName() 
+                        + " was sunk!");
+            }
+            else
+                personalGrid.setSquare(row, col, 'H');
         }
-        else
-            personalGrid.setSquare(row, col, 'H');
+        else //shot is not a hit
+            personalGrid.setSquare(row, col, 'G');
     }
     
+    /**
+     *
+     * @return
+     */
     public boolean fleetSunk()
     {
         if( fleet[0].isSunk() && 
@@ -257,12 +325,19 @@ public class Player {
             return "Fleet Admiral";
     }
     
+    /**
+     *
+     */
     public void promote() {
         rank++;
     }
     
+    /**
+     *
+     * @return
+     */
     public String toString()
     {
-        return this.getName();
+        return name;
     }
 }
