@@ -75,7 +75,7 @@ public class BattleShipGame {
                     + " [column]" + (coordinates[1] + 1) + "!");
         } else {
             if(ai.hasMultiHits()){
-                ai.changeDirection(shot);
+                ai.changeDirection(!shot);
             }
             else if(ai.getAdjacentAttacks() >= 4){
                 ai.setNumConsHits(0);
