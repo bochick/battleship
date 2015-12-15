@@ -61,7 +61,9 @@ public class AiPlayer extends Player {
             adjacentAttacks++;
             System.out.println("ai got into lastattackhit, multihits is " + multiHits);
             System.out.println("num of cons hits: " + numConsHits);
-            return nextAttack();
+           currentAttack =  nextAttack();
+           System.out.println("direction is: " + prevDirection);
+           return currentAttack;
         } else {
             System.out.println("ai did not get into lastattackhit");
             return lastAttack = currentAttack;
@@ -199,8 +201,8 @@ public class AiPlayer extends Player {
     //but still miss
     //-------------------------------------------------
 
-    public void changeDirection() {
-        if (!hitOrMiss(lastAttack[0], lastAttack[1]) && multiHits) {
+    public void changeDirection(boolean missed) {
+        if (missed && multiHits) {
             prevDirection = inverse(prevDirection);
         }
     }
