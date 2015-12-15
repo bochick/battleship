@@ -42,7 +42,7 @@ public class Ship {
     }
     
     public void hit() {
-        hits--;
+        hits++;
     }
     
     public boolean isSunk() {
