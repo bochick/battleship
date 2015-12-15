@@ -44,7 +44,7 @@ public class AiPlayer extends Player {
         int[] currentAttack = {row, col};
         
         if(multiHits)
-            return lastAttack;
+            return nextAttack(lastAttack[0], lastAttack[1]);
         else 
             return lastAttack = currentAttack;
     }
@@ -52,7 +52,6 @@ public class AiPlayer extends Player {
     @Override
    public boolean hitOrMiss(int row, int col) {
         boolean output = false;
-        multiHits = false;
         char square = personalGrid.getSquare(row, col);
         
         if (square != '^' && square != 'H' && square != 'G'){
@@ -108,7 +107,7 @@ public class AiPlayer extends Player {
             }
    }
     
-   private void nextAttackDirection(int row, int col){
+   private int[] nextAttack(int row, int col){
        if(multiHits){
            switch (prevDirection) {
                 case up: {
@@ -135,6 +134,7 @@ public class AiPlayer extends Player {
             }
            lastAttack[0] = row;
            lastAttack[1] = col;
+           return lastAttack;
        }
        else{
            switch (choseRandomDirection()) {
@@ -160,9 +160,15 @@ public class AiPlayer extends Player {
                      prevDirection = Direction.right;
                 }
                 lastAttack[0] = row;
-                lastAttack[1] = col;
-            }  
+                lastAttack[1] = col;   
+            } 
+           return lastAttack; 
        }
    }
   
+   private void changeDirection(){
+       if(!hitOrMiss(lastAttack[0], lastAttack[1]) && multiHits)
+           prevDirection = inverse(prevDirection);
+   }
+   
 }
