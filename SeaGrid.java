@@ -39,7 +39,7 @@ public class SeaGrid {
                 result += grid[row][col] + "\t";
             result += "\n";
         }
-
+        
         return result;
     }
 }
