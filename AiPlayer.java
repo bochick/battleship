@@ -15,7 +15,7 @@ public class AiPlayer extends Player {
 
     private Random rand = new Random();
     private SeaGrid personalGrid;
-    private SeaGrid guessGrid = new SeaGrid("Target grid");
+    private SeaGrid targetGrid = new SeaGrid("Target grid");
 
     private int[] lastAttack = new int[2];
     private int numConsHits = 0;//remembers the number of hits in a row
@@ -31,7 +31,6 @@ public class AiPlayer extends Player {
         super(nameInput);
     }
     
-
     //------------------------------------------
     //ai players attack() method:
     //will select a random valid location on the grid
@@ -48,16 +47,14 @@ public class AiPlayer extends Player {
             if (numConsHits >= 2) {
                 multiHits = true;
             }
-
             controlConsHits(row, col);
-
         } else {
             numConsHits = 0;
             multiHits = false;
             row = rand.nextInt(10);
             col = rand.nextInt(10);
         }
-        if (guessGrid.getSquare(row, col) == '^') {
+        if (targetGrid.getSquare(row, col) == '^') {
             int output[] = {col, row};
             lastAttack = output;
             return output;
@@ -79,7 +76,6 @@ public class AiPlayer extends Player {
             } else if (prevDirection == 0 || prevDirection == 1) {
                 orientation = 1;
             }
-
             return prevDirection;
         } else {
             int direction = rand.nextInt(4);
@@ -108,8 +104,8 @@ public class AiPlayer extends Player {
     //if it was, apply different logic in attack()
     //--------------------------------------------
     private boolean lastAttackHit() {
-        if (hitOrMiss(lastAttack[0], lastAttack[1]) != '^') {
-            System.out.println("HOOPLAH");
+        if ( hitOrMiss(lastAttack[0], lastAttack[1]) ) {
+//            System.out.println("HOOPLAH");
             return true;
         } else {
             return false;
