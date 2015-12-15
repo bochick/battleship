@@ -27,11 +27,13 @@ public class BattleShipGame {
     public void play() {
         player.buildGrid();
         ai.buildGrid();
+        boolean quit = false;
 
         do {
+            
             playerTurn();
             aiTurn();
-        } while (!player.fleetSunk() && !ai.fleetSunk());
+        } while (!player.fleetSunk() && !ai.fleetSunk() || quit);
     }
 
     private void playerTurn() {
@@ -62,12 +64,32 @@ public class BattleShipGame {
         if (shot) {
             Toolkit.getDefaultToolkit().beep();
             System.out.println("AI, " + ai + " hit one of your ships at " 
-                    + (coordinates[0] + 1) + " " + (coordinates[0] + 1) + "!");
+                    + (coordinates[0] + 1) + " " + (coordinates[1] + 1) + "!");
         } else {
             System.out.println("AI, " + ai + " missed your ships at "
-                    + (coordinates[0] + 1) + " " + (coordinates[0] + 1) + "!");
+                    + (coordinates[0] + 1) + " " + (coordinates[1] + 1) + "!");
         }
         
         player.updatePersonalGrid(coordinates[0], coordinates[1]);
+    }
+    
+    private boolean playerQuit() {
+        String input;
+        System.out.print("Do you want to continue? [Y] or [N] ");
+        input = cin.next();
+        cin.nextLine();//clears the input
+        boolean output = false;
+        
+        if (input.equalsIgnoreCase("N")) {
+            output = true;
+        }
+        else if (input.equalsIgnoreCase("Y")) {
+            output = false;
+        }
+        else {
+            System.out.print("Unknown command... ");
+            output = playerQuit();
+        }
+        return output;
     }
 }
