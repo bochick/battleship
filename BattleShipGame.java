@@ -39,10 +39,9 @@ public class BattleShipGame {
     }
 
     private void playerTurn() {
-        System.out.print(player + "'s Personal Grid:" + player.getPersonalGrid());
-        System.out.println("--------------------------------------------------"
-                + "--------------------------------------\n" + player 
-                + "'s Target Grid: " + player.getTargetGrid());
+        System.out.print(player.getPersonalGrid());
+        System.out.println(new String(new char[82]).replace("\0", "-"));
+        System.out.print(player.getTargetGrid());
         
         int[] coordinates = player.attack();
         boolean shot = ai.hitOrMiss(coordinates[0], coordinates[1]);
@@ -59,6 +58,10 @@ public class BattleShipGame {
     }
 
     private void aiTurn() {
+        System.out.print(ai.getPersonalGrid());
+        System.out.println(new String(new char[82]).replace("\0", "-"));
+        System.out.print(ai.getTargetGrid());
+        
         int[] coordinates = ai.attack();
         boolean shot = player.hitOrMiss(coordinates[0], coordinates[1]);
         ai.updateGuessGrid(coordinates[0], coordinates[1], shot);
@@ -68,8 +71,8 @@ public class BattleShipGame {
             ai.setNumConsHits(ai.getNumConsHits() + 1);
             Toolkit.getDefaultToolkit().beep();
             System.out.println("AI, " + ai + " hit one of your ships at " 
-                    + "[row]:" + (coordinates[0] + 1) 
-                    + " [column]:" + (coordinates[1] + 1) + "!");
+                    + "[row]" + (coordinates[0] + 1) 
+                    + " [column]" + (coordinates[1] + 1) + "!");
         } else {
             if(ai.hasMultiHits()){
                 ai.changeDirection();
@@ -80,8 +83,8 @@ public class BattleShipGame {
             }
                 
             System.out.println("AI, " + ai + " missed your ships at "
-                    + "[row]:" + (coordinates[0] + 1) 
-                    + " [column]:" + (coordinates[1] + 1) + "!");
+                    + "[row]" + (coordinates[0] + 1) 
+                    + " [column]" + (coordinates[1] + 1) + "!");
         }
         
         player.updatePersonalGrid(coordinates[0], coordinates[1]);
