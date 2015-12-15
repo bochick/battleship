@@ -13,9 +13,10 @@ import java.util.Random;
  */
 public class AiPlayer extends Player {
 
+     private Ship[] fleet;
     private Random rand = new Random();
     private SeaGrid personalGrid;
-    private SeaGrid guessGrid = new SeaGrid("Target grid");
+    private SeaGrid targetGrid = new SeaGrid("Target grid");
 
    public enum Direction {up, down, left, right}
     private int[] lastAttack = new int[2];
@@ -27,9 +28,18 @@ public class AiPlayer extends Player {
     // -1 = horizontal
 
     private boolean multiHits = false;//if true, continue attack pattern
+    private boolean lastAttackHit;
 
     public AiPlayer(String nameInput) {
         super(nameInput);
+        personalGrid = new SeaGrid(nameInput + "\'s grid");
+        lastAttackHit = false;
+        fleet = new Ship[5];
+        fleet[0] = new Ship("Destroyer", 2);
+        fleet[1] = new Ship("Submarine", 3);
+        fleet[2] = new Ship("Frigate", 3);
+        fleet[3] = new Ship("Cruiser", 4);
+        fleet[4] = new Ship("Aircraft Carrier", 5);
     }
    
      @Override
@@ -43,20 +53,25 @@ public class AiPlayer extends Player {
         int col = rand.nextInt(9);
         int[] currentAttack = {row, col};
         
-        if(multiHits)
-            return nextAttack(lastAttack[0], lastAttack[1]);
-        else 
+        if(lastAttackHit){
+            System.out.println("ai got into lastattackhit, multihits is " + multiHits);
+            return nextAttack();
+        }
+        else{
+            System.out.println("ai did not get into lastattackhit");
             return lastAttack = currentAttack;
+        }
     }
     
     @Override
    public boolean hitOrMiss(int row, int col) {
         boolean output = false;
-        char square = personalGrid.getSquare(row, col);
+        char square = targetGrid.getSquare(row, col);
         
         if (square != '^' && square != 'H' && square != 'G'){
             numConsHits++;
             output = true;
+            lastAttackHit = true;
             if(numConsHits >= 2)
                 multiHits = true;
         } 
@@ -107,60 +122,50 @@ public class AiPlayer extends Player {
             }
    }
     
-   private int[] nextAttack(int row, int col){
+   private int[] nextAttack(){
        if(multiHits){
            switch (prevDirection) {
                 case up: {
-                   row = lastAttack[0]--;
-                   col = lastAttack[1];
+                   lastAttack[0]--;
                    prevDirection = Direction.up;
                 }
                 case down: {
-                    row = lastAttack[0]++;
-                    col = lastAttack[1];
+                   lastAttack[0]++;
                     prevDirection = Direction.down;
                 }
 
                 case left: {
-                    row = lastAttack[0];
-                    col = lastAttack[1]++;
+                    lastAttack[1]++;
                     prevDirection = Direction.left;
                 }
                 case right: {
-                    row = lastAttack[0];
-                    col = lastAttack[1]--;
+                    lastAttack[1]--;
                      prevDirection = Direction.right;
                 }
             }
-           lastAttack[0] = row;
-           lastAttack[1] = col;
+
            return lastAttack;
        }
        else{
-           switch (choseRandomDirection()) {
+           Direction temp = choseRandomDirection();
+           switch (temp) {
                 case up: {
-                   row = lastAttack[0]--;
-                   col = lastAttack[1];
+                   lastAttack[0]--;
                    prevDirection = Direction.up;
                 }
                 case down: {
-                    row = lastAttack[0]++;
-                    col = lastAttack[1];
+                    lastAttack[0]++;
                     prevDirection = Direction.down;
                 }
 
                 case left: {
-                    row = lastAttack[0];
-                    col = lastAttack[1]++;
+                    lastAttack[1]++;
                     prevDirection = Direction.left;
                 }
                 case right: {
-                    row = lastAttack[0];
-                    col = lastAttack[1]--;
+                    lastAttack[1]--;
                      prevDirection = Direction.right;
                 }
-                lastAttack[0] = row;
-                lastAttack[1] = col;   
             } 
            return lastAttack; 
        }
@@ -170,5 +175,11 @@ public class AiPlayer extends Player {
        if(!hitOrMiss(lastAttack[0], lastAttack[1]) && multiHits)
            prevDirection = inverse(prevDirection);
    }
+   
+   public void setLastAttackHit(boolean hit){
+       lastAttackHit = hit;
+   }
+   
+   
    
 }
