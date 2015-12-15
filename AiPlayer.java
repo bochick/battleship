@@ -13,159 +13,282 @@ import java.util.Random;
  */
 public class AiPlayer extends Player {
 
+    //private Ship[] fleet;
     private Random rand = new Random();
-    private SeaGrid personalGrid;
-    private SeaGrid guessGrid = new SeaGrid("Target grid");
+    //private SeaGrid personalGrid;
+    //private SeaGrid targetGrid = new SeaGrid("Target grid");
 
     private int[] lastAttack = new int[2];
+    private int[] temp = new int[2];
+    private int numTriedAttacks;
     private int numConsHits = 0;//remembers the number of hits in a row
-    private int prevDirection;//remembers the previous direction
-    private int orientation = 0;
-    // 0 = n/a
-    // 1 = vertical
-    // -1 = horizontal
+    private int adjacentAttacks;
+    private Direction prevDirection;//remembers the previous direction
 
     private boolean multiHits = false;//if true, continue attack pattern
+    private boolean lastAttackHit;
 
     public AiPlayer(String nameInput) {
         super(nameInput);
+        //personalGrid = new SeaGrid(nameInput + "\'s grid");
+        lastAttackHit = false;
+        adjacentAttacks = 0;
+        numTriedAttacks = 0;
+        //fleet = new Ship[5];
+        //fleet[0] = new Ship("Destroyer", 2);
+       // fleet[1] = new Ship("Submarine", 3);
+        //fleet[2] = new Ship("Frigate", 3);
+        //fleet[3] = new Ship("Cruiser", 4);
+        //fleet[4] = new Ship("Aircraft Carrier", 5);
     }
-    
-
-    //------------------------------------------
-    //ai players attack() method:
-    //will select a random valid location on the grid
-    //if they have not attacked there before, return row, col
-    //if they have, method will recurse.
-    //------------------------------------------
-    @Override
-    public int[] attack() {
-        int row = 0;
-        int col = 0;
-
-        if (lastAttackHit()) {
-            numConsHits++;
-            if (numConsHits >= 2) {
-                multiHits = true;
-            }
-
-            controlConsHits(row, col);
-
-        } else {
-            numConsHits = 0;
-            multiHits = false;
-            row = rand.nextInt(10);
-            col = rand.nextInt(10);
-        }
-        if (guessGrid.getSquare(row, col) == '^') {
-            int output[] = {col, row};
-            lastAttack = output;
-            return output;
-        } else {
-            return attack();
-        }
-    }
-
-    //---------------------------------------------------------
-    //nextAttackDirection() is used to tell
-    //the ai where to attack next.
-    //if there has not yet been a hit, return a value at random
-    //if there was a hit, return the previous value
-    //---------------------------------------------------------
-    private int nextAttackDirection() {
-        if (multiHits) {
-            if (prevDirection == 2 || prevDirection == 3) {
-                orientation = -1;
-            } else if (prevDirection == 0 || prevDirection == 1) {
-                orientation = 1;
-            }
-
-            return prevDirection;
-        } else {
-            int direction = rand.nextInt(4);
-
-            if (orientation == -1) {
-                if (prevDirection == 3) {
-                    direction = 2;
-                } else if (prevDirection == 2) {
-                    direction = 3;
-                }
-            } else if (orientation == 1) {
-                if (prevDirection == 1) {
-                    direction = 0;
-                } else if (prevDirection == 0) {
-                    direction = 1;
-                }
-            }
-
-            return direction;
-        }
-    }
-
-    //--------------------------------------------
-    //lastAttackHit() used to check if the last
-    //shot fired was a hit.
-    //if it was, apply different logic in attack()
-    //--------------------------------------------
-    private boolean lastAttackHit() {
-        if (hitOrMiss(lastAttack[0], lastAttack[1]) != '^') {
-            System.out.println("HOOPLAH");
-            return true;
-        } else {
-            return false;
-        }
-    }
-    
-//    private boolean lastAttackSunk() {
-//        char square = personalGrid.getSquare(lastAttack[0], lastAttack[1]);
-//        if (square == 'S') {
-//            orientation = 0;
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
 
     @Override
     public void buildGrid() {
         randomPlacement();
     }
 
-//    public void getSunk() {
-//        orientation = 0;
-//    }
+    //-------------------------------------------------
+    //attack() returns the cordinates of the ai's attack
+    //if the ai has no previous hits, attack at random
+    //otherwise call nextAttack() if the last attack hit
+    //-------------------------------------------------
+    @Override
+    public int[] attack() {
+        int row = rand.nextInt(9);
+        int col = rand.nextInt(9);
+        int[] currentAttack = {row, col};
 
-    //------------------NOTES NOT YET COMPLETE-----------------
-    //if next attack hits, chose a direction to try at random.
-    //"next" will have to be remembered if the attack hits again
-    //to keep trying that direction.
-    //---------------------------------------------------------
-    private void controlConsHits(int row, int col) {
-        //prevDirection = nextAttackDirection();
-        int next = nextAttackDirection();
-        if (lastAttack[0] > 9 && lastAttack[1] > 9) {
-            switch (next) {
-                case 0: {
-                    row = lastAttack[0]--;
-                    col = lastAttack[1];
-                }//up
-                case 1: {
-                    row = lastAttack[0]++;
-                    col = lastAttack[1];
-                }//down
-
-                //-----------------------------
-                case 2: {
-                    row = lastAttack[0];
-                    col = lastAttack[1]++;
-                }//left
-                case 3: {
-                    row = lastAttack[0];
-                    col = lastAttack[1]--;
-                }//right
-                }
+        if (lastAttackHit) {
+            adjacentAttacks++;
+            System.out.println("ai got into lastattackhit, multihits is " + multiHits);
+            System.out.println("num of cons hits: " + numConsHits);
+           currentAttack =  nextAttack();
+           System.out.println("direction is: " + prevDirection);
+           return currentAttack;
+        } else {
+            System.out.println("ai did not get into lastattackhit");
+            return lastAttack = currentAttack;
         }
-        prevDirection = next;
+    }
+    //-------------------------------------------------
+    //chose a direction at random by using a random number
+    //0 = up
+    //1 = down
+    //2 = left
+    //3 = right
+    //is up by default
+    //-------------------------------------------------
+    private Direction choseRandomDirection() {
+        numTriedAttacks++;
+        switch (numTriedAttacks) {
+            case 1: {
+                return Direction.up;
+            }
+            case 2: {
+                return Direction.down;
+            }
+
+            case 3: {
+                return Direction.left;
+            }
+            case 4: {
+                return Direction.right;
+            }
+            default: {
+                return Direction.up;
+            }
+        }
+    }
+    //-------------------------------------------------
+    //used to get the inverse of the current direction
+    //-------------------------------------------------
+    private Direction inverse(Direction current) {
+        if(current == Direction.up)
+            return Direction.down;
+        else if(current == Direction.down)
+            return Direction.up;
+        else if(current == Direction.left)
+            return Direction.right;
+        else if (current == Direction.right)        
+                return Direction.left;
+        else
+            return current;
+        }
+    //--------------------------------------------------------------------------
+    //nextAttack returns the cordinates of the next attack ai will make
+    //also sets multiHits to true if ai has landed atleast 2 attacks in a row
+    //checks if the direction is valid on the grid, if not inverse the direction
+    //--------------------------------------------------------------------------
+    private int[] nextAttack() {
+        temp = lastAttack;
+        if (numConsHits >= 2) {
+            multiHits = true;
+        }
+        if (multiHits) {
+            switch (prevDirection) {
+                case up: {
+                    lastAttack[0]--;
+                    prevDirection = Direction.up;
+                    break;
+                }
+                case down: {
+                    lastAttack[0]++;
+                    prevDirection = Direction.down;
+                    break;
+                }
+
+                case left: {
+                    lastAttack[1]--;
+                    prevDirection = Direction.left;
+                    break;
+                }
+                case right: {
+                    lastAttack[1]++;
+                    prevDirection = Direction.right;
+                    break;
+                }
+            }
+            if (isValidAttack(lastAttack[0], lastAttack[1])) {
+                return lastAttack;
+            } else {
+                prevDirection = inverse(prevDirection);
+                return nextAttack();
+            }
+        } else {
+            switch (choseRandomDirection()) {
+                case up: {
+                    lastAttack[0]--;
+                    prevDirection = Direction.up;
+                    System.out.println(prevDirection);
+                    break;
+                }
+                case down: {
+                    lastAttack[0]++;
+                    prevDirection = Direction.down;
+                    System.out.println(prevDirection);
+                    break;
+                }
+
+                case left: {
+                    lastAttack[1]--;
+                    prevDirection = Direction.left;
+                    System.out.println(prevDirection);
+                    break;
+                }
+                case right: {
+                    lastAttack[1]++;
+                    prevDirection = Direction.right;
+                    System.out.println(prevDirection);
+                    break;
+                }
+            }
+            if (isValidAttack(lastAttack[0], lastAttack[1])) {
+                return lastAttack;
+            } else {
+                prevDirection = inverse(prevDirection);
+                return nextAttack();
+            }
+        }
+    }
+    //-------------------------------------------------
+    //***** to be used in battleShipGame ******
+    //*****************************************
+    //-------------------------------------------------
+    //used to change the direction if we know the orientation
+    //but still miss
+    //-------------------------------------------------
+    public void changeDirection(boolean missed) {
+        if (missed && multiHits) {
+            if(prevDirection == Direction.up)
+                lastAttack[0] += numConsHits;
+            else if (prevDirection == Direction.down)
+                lastAttack[0] -= numConsHits;
+            else if (prevDirection == Direction.left)
+                lastAttack[1] += numConsHits;
+            else if (prevDirection == Direction.right)
+                lastAttack[1] -= numConsHits;
+            prevDirection = inverse(prevDirection);
+            System.out.println("direction has been inversed");
+        }
+    }
+    
+    public void setLastAttackHit(boolean hit) {
+        lastAttackHit = hit;
+    }
+    //-------------------------------------------------
+    //checks to make sure the attack is within the grid
+    //-------------------------------------------------
+    private boolean isValidAttack(int row, int col) {
+        if (row < 10 && col < 10 && row > -1 && col > -1) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+   //-----------------------------------------
+    //***** to be used in battleShipGame ******
+    //*****************************************
+    //-----------------------------------------
+    //checks if the ai has landed multiple hits
+    //-----------------------------------------
+    public boolean hasMultiHits() {
+        return multiHits;
+    }
+    public void setMultiHits(boolean h){
+        multiHits = h;
+    }
+   //-----------------------------------------
+    //***** to be used in battleShipGame ******
+    //*****************************************
+    //-----------------------------------------
+    //chekcs the number of adjacent attacks
+    //used so the ai will check all 4 adjacent
+    //squares in the worse case
+    //-----------------------------------------
+    public int getAdjacentAttacks() {
+        return adjacentAttacks;
+    }
+   //-----------------------------------------
+    //***** to be used in battleShipGame ******
+    //*****************************************
+    //-----------------------------------------
+    //used to add to or reset the number of
+    //cons hits
+    //-----------------------------------------
+
+    public void setNumConsHits(int n) {
+        numConsHits = n;
+    }
+   //-----------------------------------------
+    //***** to be used in battleShipGame ******
+    //*****************************************
+    //-----------------------------------------
+    //used to get the current number of cons hits
+    //-----------------------------------------
+
+    public int getNumConsHits() {
+        return numConsHits;
+    }
+   //-----------------------------------------
+    //***** to be used in battleShipGame ******
+    //*****************************************
+    //-----------------------------------------
+    //used to reset last attack after missing
+    //when attacking an adjacent square. only
+    //up to 4 times
+    //-----------------------------------------
+
+    public void resetLastAttack() {
+        lastAttack = temp;
     }
 
+    public Direction getDirection(){
+        return prevDirection;
+    }
+    
+    public int getNumTriedAttacks(){
+        return numTriedAttacks;
+    }
+
+   
 }
