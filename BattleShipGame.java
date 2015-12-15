@@ -64,10 +64,12 @@ public class BattleShipGame {
         if (shot) {
             Toolkit.getDefaultToolkit().beep();
             System.out.println("AI, " + ai + " hit one of your ships at " 
-                    + (coordinates[0] + 1) + " " + (coordinates[1] + 1) + "!");
+                    + "[row]:" + (coordinates[0] + 1) 
+                    + " [column]:" + (coordinates[1] + 1) + "!");
         } else {
             System.out.println("AI, " + ai + " missed your ships at "
-                    + (coordinates[0] + 1) + " " + (coordinates[1] + 1) + "!");
+                    + "[row]:" + (coordinates[0] + 1) 
+                    + " [column]:" + (coordinates[1] + 1) + "!");
         }
         
         player.updatePersonalGrid(coordinates[0], coordinates[1]);
