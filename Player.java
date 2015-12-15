@@ -229,7 +229,7 @@ public class Player {
         } catch (Exception error) { 
             System.out.println("Input error! Defaulting to [row] 1 [column] 1");
             output = new int[] {0, 0}; 
-            
+            cin.nextLine();//clears the input
             return output;
         }
     }
