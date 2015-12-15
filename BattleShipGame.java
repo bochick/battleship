@@ -77,9 +77,7 @@ public class BattleShipGame {
             Toolkit.getDefaultToolkit().beep();
             
             if (ship != null) {
-                ai.setMultiHits(false);
-                ai.setNumConsHits(0);
-                ai.setLastAttackHit(false);
+                ai.reportSunkenShip();
                 System.out.println(ai + " sunk " + ship);
             }
             else {
