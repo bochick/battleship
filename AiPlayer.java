@@ -25,6 +25,7 @@ public class AiPlayer extends Player {
     private int adjacentAttacks;
     private Direction prevDirection;//remembers the previous direction
 
+    private boolean inversed = false;
     private boolean multiHits = false;//if true, continue attack pattern
     private boolean lastAttackHit;
 
@@ -165,27 +166,55 @@ public class AiPlayer extends Player {
         } else {
             switch (choseRandomDirection()) {
                 case up: {
+                    if ( lastAttack[0] >= 2 )
+                    {
                     lastAttack[0]--;
-                    prevDirection = Direction.up;
+                    prevDirection = Player.Direction.up;
                     System.out.println(prevDirection);
                     break;
+                    }
+                    else
+                    {
+                    numTriedAttacks++;
+                    lastAttack[0]++;
+                    prevDirection = Player.Direction.down;
+                    System.out.println(prevDirection);
+                    break;
+                    }
                 }
                 case down: {
-                    lastAttack[0]++;
-                    prevDirection = Direction.down;
+                    if ( lastAttack[0] <= 8 )
+                    {
+                    lastAttack[0] += 2;
+                    prevDirection = Player.Direction.down;
                     System.out.println(prevDirection);
                     break;
+                    }
                 }
 
                 case left: {
+                    if ( prevDirection == Player.Direction.down )
+                        lastAttack[0]--;
+                    
+                    if ( lastAttack[1] >= 2 )
+                    {
                     lastAttack[1]--;
-                    prevDirection = Direction.left;
+                    prevDirection = Player.Direction.left;
                     System.out.println(prevDirection);
                     break;
+                    }
+                    else
+                    {
+                    numTriedAttacks++;
+                    lastAttack[1]++;
+                    prevDirection = Player.Direction.right;
+                    System.out.println(prevDirection);
+                    break;  
+                    }
                 }
                 case right: {
-                    lastAttack[1]++;
-                    prevDirection = Direction.right;
+                    lastAttack[1] += 2;
+                    prevDirection = Player.Direction.right;
                     System.out.println(prevDirection);
                     break;
                 }
@@ -286,6 +315,16 @@ public class AiPlayer extends Player {
     //up to 4 times
     //-----------------------------------------
 
+    public boolean getInversed()
+    {
+        return inversed;
+    }
+    
+    public void setInversed(boolean inv)
+    {
+        inversed = inv;
+    }
+    
     public void resetLastAttack() {
         lastAttack = temp;
     }
