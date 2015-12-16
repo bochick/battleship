@@ -113,6 +113,11 @@ public class BattleShipGame {
                 ai.changeDirection(!shot);
                 ai.setInversed(true);
             }
+            else if(ai.hasMultiHits() && ai.getInversed()){
+                ai.setLastAttackHit(false);
+                ai.setInversed(false);
+                ai.setMultiHits(false);
+            }
             //else if(ai.getNumTriedAttacks() >= 4){
            //     ai.setNumConsHits(0);
            //     ai.setLastAttackHit(false);
