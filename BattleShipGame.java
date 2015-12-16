@@ -2,6 +2,7 @@ package battleship;
 
 import java.util.Scanner;
 import java.awt.*;
+import javax.swing.JFrame;
 
 /**
  *
@@ -13,7 +14,11 @@ public class BattleShipGame {
     private AiPlayer ai;
     private Scanner cin = new Scanner(System.in);
     
+    private JFrame frame;
+    private SeaGridOutput sgo;
+
     public BattleShipGame() {
+        createSeaGridGUI(); //GUI
         System.out.print("Initiating Battle Ship...\n"
                 + "Please provide your name: ");
         String input = cin.next();
@@ -33,7 +38,9 @@ public class BattleShipGame {
 
         do {
             playerTurn();
+            updateSeaGridOutput();  //GUI
             aiTurn();
+            updateSeaGridOutput();  //GUI
             quit = playerQuit();
         } while (!player.fleetSunk() && !ai.fleetSunk() && !quit);
         
@@ -58,6 +65,22 @@ public class BattleShipGame {
         }
     }
     
+    private void createSeaGridGUI() {
+        frame = new JFrame("Output");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setResizable(false);
+        frame.getContentPane().setLayout(new BorderLayout());
+        frame.getContentPane().add(sgo = new SeaGridOutput());
+        frame.pack();
+        frame.setVisible(true);
+    }
+    
+    private void updateSeaGridOutput()
+    {
+        sgo.updatePlayerGrid(player.getTargetGrid(), player.getPersonalGrid(), 
+                ai.getTargetGrid(), ai.getPersonalGrid());
+    }
+
    private void playerTurn() {
         System.out.print(player.getPersonalGrid());
         System.out.println(new String(new char[82]).replace("\0", "-"));
