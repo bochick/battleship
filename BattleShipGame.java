@@ -12,6 +12,7 @@ public class BattleShipGame {
     private Player player;
     private AiPlayer ai;
     private Scanner cin = new Scanner(System.in);
+    private boolean quit = false;
 
     public BattleShipGame() {
         System.out.print("Initiating Battle Ship...\n"
@@ -21,45 +22,65 @@ public class BattleShipGame {
         player = new Player(input);
         ai = new AiPlayer("Marvin");
         
-        System.out.println("Welcome to Battle Ship " + player.getRank() + " "
-                + player + "! Prepare for combat.");
+        System.out.println("Welcome to Battle Ship " + player 
+                + "! Prepare for combat.");
     }
 
     public void play() {
+        Player winner;
         player.buildGrid();
         ai.buildGrid();
 
-        boolean quit = false;
-
         do {
-            
-            playerTurn();
+            quit = playerTurn();
             aiTurn();
-        } while (!player.fleetSunk() && !ai.fleetSunk() || quit);
+        } while (!player.fleetSunk() && !ai.fleetSunk() && !quit);
+        
+        if (player.fleetSunk() || quit) {
+            if (quit) 
+                System.out.println(player + " quit early and has forfeit!");
+            winner = ai;
+            ai.promote();
+        }
+        else {
+            winner = player;
+        }
+        
+        System.out.println(reportWinner(winner));
+        System.out.print("Do you want to play another game? [Y] or [N] ");
+        String input = cin.next();
+        cin.nextLine();//clears the input
+        
+        if (input.equalsIgnoreCase("Y")) {
+            play();
+        }
     }
 
-   private void playerTurn() {
+   private boolean playerTurn() {
         System.out.print(player.getPersonalGrid());
         System.out.println(new String(new char[82]).replace("\0", "-"));
         System.out.print(player.getTargetGrid());
         
-        int[] coordinates = player.attack();
-        boolean shot = ai.hit(coordinates[0], coordinates[1]);
-        player.updateGuessGrid(coordinates[0], coordinates[1], shot);
-        Ship.Enum ship = ai.updatePersonalGrid(coordinates[0], coordinates[1]);
+        quit = playerQuit();
         
-        if (shot) {
-            Toolkit.getDefaultToolkit().beep();
-            System.out.println(player + ", you've landed a shot!");
-            if (ship != null) {
-                player.targetGrid.setSquare(coordinates[0], coordinates[1], 'X');
-                System.out.println(player + " you have sunk " + ship);
-                player.promote();
+        if (!quit) {
+            int[] coordinates = player.attack();
+            boolean shot = ai.hit(coordinates[0], coordinates[1]);
+            player.updateGuessGrid(coordinates[0], coordinates[1], shot);
+            Ship.Enum ship = ai.updatePersonalGrid(coordinates[0], coordinates[1]);
+
+            if (shot) {
+                Toolkit.getDefaultToolkit().beep();
+                System.out.println(player + ", you've landed a shot!");
+                if (ship != null) {
+                    System.out.println(player + " you have sunk " + ship);
+                    player.promote();
+                }
+            } else {
+                System.out.println(player + ", you've missed a shot.");
             }
-        } else {
-            System.out.println(player + ", you've missed a shot.");
         }
-        
+        return quit;
     }
 
     private void aiTurn() {
@@ -78,7 +99,6 @@ public class BattleShipGame {
             Toolkit.getDefaultToolkit().beep();
             
             if (ship != null) {
-                ai.targetGrid.setSquare(coordinates[0], coordinates[1], 'X');
                 ai.reportSunkenShip();
                 System.out.println(ai + " sunk " + ship);
             }
@@ -88,9 +108,8 @@ public class BattleShipGame {
                         + " [column]" + (coordinates[1] + 1) + "!");
             }
         } else {
-            if(ai.hasMultiHits() && !ai.getInversed()){
+            if(ai.hasMultiHits()){
                 ai.changeDirection(!shot);
-                ai.setInversed(true);
             }
             //else if(ai.getNumTriedAttacks() >= 4){
            //     ai.setNumConsHits(0);
@@ -106,21 +125,28 @@ public class BattleShipGame {
     
     private boolean playerQuit() {
         String input;
-        System.out.print("Do you want to continue? [Y] or [N] ");
+        System.out.print("Do you want to quit the game? [Y] or [N]: ");
         input = cin.next();
-        cin.nextLine();//clears the input
         boolean output = false;
         
         if (input.equalsIgnoreCase("N")) {
-            output = true;
+            output = false;
         }
         else if (input.equalsIgnoreCase("Y")) {
-            output = false;
+            output = true;
         }
         else {
             System.out.print("Unknown command... ");
             output = playerQuit();
         }
+        cin.nextLine();//clears the input
+        System.out.println();
+        return output;
+    }
+    
+    private String reportWinner(Player win) {
+        String output = new String(new char[82]).replace("\0", "-") + "\n" 
+                + win + " has won!\n(Final) " + win.getPersonalGrid();
         return output;
     }
 }
