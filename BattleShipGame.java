@@ -38,9 +38,7 @@ public class BattleShipGame {
 
         do {
             playerTurn();
-            updateSeaGridOutput();  //GUI
             aiTurn();
-            updateSeaGridOutput();  //GUI
             quit = playerQuit();
         } while (!player.fleetSunk() && !ai.fleetSunk() && !quit);
         
