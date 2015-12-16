@@ -12,7 +12,7 @@ public class BattleShipGame {
     private Player player;
     private AiPlayer ai;
     private Scanner cin = new Scanner(System.in);
-    
+
     public BattleShipGame() {
         System.out.print("Initiating Battle Ship...\n"
                 + "Please provide your name: ");
@@ -26,38 +26,18 @@ public class BattleShipGame {
     }
 
     public void play() {
-        Player winner;
-        boolean quit = false;
         player.buildGrid();
         ai.buildGrid();
 
+        boolean quit = false;
+
         do {
+            
             playerTurn();
             aiTurn();
-            quit = playerQuit();
-        } while (!player.fleetSunk() && !ai.fleetSunk() && !quit);
-        
-        if (player.fleetSunk() || quit) {
-            if (quit) 
-                System.out.println(player + " quit early and has forfeit!");
-            winner = ai;
-            ai.promote();
-        }
-        else {
-            winner = player;
-            player.promote();
-        }
-        
-        System.out.println(reportWinner(winner));
-        System.out.print("Do you want to play another game? [Y] or [N] ");
-        String input = cin.next();
-        cin.nextLine();//clears the input
-        
-        if (input.equalsIgnoreCase("Y")) {
-            play();
-        }
+        } while (!player.fleetSunk() && !ai.fleetSunk() || quit);
     }
-    
+
    private void playerTurn() {
         System.out.print(player.getPersonalGrid());
         System.out.println(new String(new char[82]).replace("\0", "-"));
@@ -72,6 +52,7 @@ public class BattleShipGame {
             Toolkit.getDefaultToolkit().beep();
             System.out.println(player + ", you've landed a shot!");
             if (ship != null) {
+                player.targetGrid.setSquare(coordinates[0], coordinates[1], 'X');
                 System.out.println(player + " you have sunk " + ship);
                 player.promote();
             }
@@ -97,6 +78,7 @@ public class BattleShipGame {
             Toolkit.getDefaultToolkit().beep();
             
             if (ship != null) {
+                ai.targetGrid.setSquare(coordinates[0], coordinates[1], 'X');
                 ai.reportSunkenShip();
                 System.out.println(ai + " sunk " + ship);
             }
@@ -106,8 +88,9 @@ public class BattleShipGame {
                         + " [column]" + (coordinates[1] + 1) + "!");
             }
         } else {
-            if(ai.hasMultiHits()){
+            if(ai.hasMultiHits() && !ai.getInversed()){
                 ai.changeDirection(!shot);
+                ai.setInversed(true);
             }
             //else if(ai.getNumTriedAttacks() >= 4){
            //     ai.setNumConsHits(0);
@@ -123,28 +106,21 @@ public class BattleShipGame {
     
     private boolean playerQuit() {
         String input;
-        System.out.print("Do you want to quit the game? [Y] or [N]: ");
+        System.out.print("Do you want to continue? [Y] or [N] ");
         input = cin.next();
+        cin.nextLine();//clears the input
         boolean output = false;
         
         if (input.equalsIgnoreCase("N")) {
-            output = false;
+            output = true;
         }
         else if (input.equalsIgnoreCase("Y")) {
-            output = true;
+            output = false;
         }
         else {
             System.out.print("Unknown command... ");
             output = playerQuit();
         }
-        cin.nextLine();//clears the input
-        System.out.println();
-        return output;
-    }
-    
-    private String reportWinner(Player win) {
-        String output = new String(new char[82]).replace("\0", "-") + win 
-                + " has won!\n(Final) " + win.getPersonalGrid();
         return output;
     }
 }
