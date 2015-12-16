@@ -99,6 +99,7 @@ public class BattleShipGame {
             Toolkit.getDefaultToolkit().beep();
             
             if (ship != null) {
+                ai.targetGrid.setSquare(coordinates[0], coordinates[1], 'X');
                 ai.reportSunkenShip();
                 System.out.println(ai + " sunk " + ship);
             }
@@ -108,8 +109,9 @@ public class BattleShipGame {
                         + " [column]" + (coordinates[1] + 1) + "!");
             }
         } else {
-            if(ai.hasMultiHits()){
+            if(ai.hasMultiHits() && !ai.getInversed()){
                 ai.changeDirection(!shot);
+                ai.setInversed(true);
             }
             //else if(ai.getNumTriedAttacks() >= 4){
            //     ai.setNumConsHits(0);
