@@ -5,7 +5,7 @@ import java.awt.*;
 
 /**
  *
- * @author
+ * @author John, Dom, Anthony, Brad, Sang
  */
 public class BattleShipGame {
 
@@ -21,8 +21,8 @@ public class BattleShipGame {
 
         player = new Player(input);
         ai = new AiPlayer("Marvin");
-        
-        System.out.println("Welcome to Battle Ship " + player 
+
+        System.out.println("Welcome to Battle Ship " + player
                 + "! Prepare for combat.");
     }
 
@@ -35,39 +35,38 @@ public class BattleShipGame {
             quit = playerTurn();
             aiTurn();
         } while (!player.fleetSunk() && !ai.fleetSunk() && !quit);
-        
+
         if (player.fleetSunk() || quit) {
-            if (quit) 
+            if (quit) {
                 System.out.println(player + " quit early and has forfeit!");
+            }
             winner = ai;
             ai.promote();
-        }
-        else {
+        } else {
             winner = player;
         }
-        
+
         System.out.println(reportWinner(winner));
         System.out.print("Do you want to play another game? [Y] or [N] ");
         String input = cin.next();
         cin.nextLine();//clears the input
-        
+
         if (input.equalsIgnoreCase("Y")) {
             play();
         }
     }
 
-   private boolean playerTurn() {
+    private boolean playerTurn() {
         System.out.print(player.getPersonalGrid());
         System.out.println(new String(new char[82]).replace("\0", "-"));
         System.out.print(player.getTargetGrid());
-        
-        quit = playerQuit();
-        
+
+//        quit = playerQuit();
         if (!quit) {
             int[] coordinates = player.attack();
             boolean shot = ai.hit(coordinates[0], coordinates[1]);
             player.updateGuessGrid(coordinates[0], coordinates[1], shot);
-            Ship.Enum ship = ai.updatePersonalGrid(coordinates[0], coordinates[1]);
+            Ship ship = ai.updatePersonalGrid(coordinates[0], coordinates[1]);
 
             if (shot) {
                 Toolkit.getDefaultToolkit().beep();
@@ -75,6 +74,9 @@ public class BattleShipGame {
                 if (ship != null) {
                     System.out.println(player + " you have sunk " + ship);
                     player.promote();
+                    
+                    int sunk[] = ship.getLocation();
+                    player.updateShipOnGrid(false, sunk[0], sunk[1], ship.getDirection(), ship.getSize(), 'X');
                 }
             } else {
                 System.out.println(player + ", you've missed a shot.");
@@ -84,75 +86,69 @@ public class BattleShipGame {
     }
 
     private void aiTurn() {
-        System.out.print(ai.getPersonalGrid());
-        System.out.println(new String(new char[82]).replace("\0", "-"));
-        System.out.print(ai.getTargetGrid());
-        
+//        System.out.print(ai.getPersonalGrid());
+//        System.out.println(new String(new char[82]).replace("\0", "-"));
+//        System.out.print(ai.getTargetGrid());
+
         int[] coordinates = ai.attack();
         boolean shot = player.hit(coordinates[0], coordinates[1]);
         ai.updateGuessGrid(coordinates[0], coordinates[1], shot);
-        Ship.Enum ship = player.updatePersonalGrid(coordinates[0], coordinates[1]);
-        
-         if (shot) {
+        Ship ship = player.updatePersonalGrid(coordinates[0], coordinates[1]);
+
+        if (shot) {
             ai.setLastAttackHit(true);
             ai.setNumConsHits(ai.getNumConsHits() + 1);
             Toolkit.getDefaultToolkit().beep();
-            
-            if (ship != null) {
-                ai.targetGrid.setSquare(coordinates[0], coordinates[1], 'X');
+
+            if (ship != null) { //if a ship was sunk
+                int sunk[] = ship.getLocation();
+                ai.updateShipOnGrid(false, sunk[0], sunk[1], ship.getDirection(), ship.getSize(), 'X');
                 ai.reportSunkenShip();
+                
                 System.out.println(ai + " sunk " + ship);
-            }
-            else {
-                    System.out.println("AI, " + ai + " hit one of your ships at " 
-                        + "[row]" + (coordinates[0] + 1) 
+            } else {//ship hit but not sunk
+                System.out.println("AI, " + ai + " hit one of your ships at "
+                        + "[row]" + (coordinates[0] + 1)
                         + " [column]" + (coordinates[1] + 1) + "!");
             }
         } else {
-            if(ai.hasMultiHits() && !ai.getInversed()){
+            if (ai.hasMultiHits() && !ai.getInversed()) {
                 ai.changeDirection(!shot);
                 ai.setInversed(true);
-            }
-            else if(ai.hasMultiHits() && ai.getInversed()){
+            } else if (ai.hasMultiHits() && ai.getInversed()) {
                 ai.setLastAttackHit(false);
                 ai.setInversed(false);
                 ai.setMultiHits(false);
             }
-            //else if(ai.getNumTriedAttacks() >= 4){
-           //     ai.setNumConsHits(0);
-           //     ai.setLastAttackHit(false);
-           // }
-                
+
             System.out.println("AI, " + ai + " missed your ships at "
-                    + "[row]" + (coordinates[0] + 1) 
+                    + "[row]" + (coordinates[0] + 1)
                     + " [column]" + (coordinates[1] + 1) + "!");
         }
-        
+
     }
-    
+
     private boolean playerQuit() {
         String input;
         System.out.print("Do you want to quit the game? [Y] or [N]: ");
         input = cin.next();
         boolean output = false;
-        
+
         if (input.equalsIgnoreCase("N")) {
             output = false;
-        }
-        else if (input.equalsIgnoreCase("Y")) {
+        } else if (input.equalsIgnoreCase("Y")) {
             output = true;
-        }
-        else {
-            System.out.print("Unknown command... ");
+        } else {
+            System.out.println("Unknown command... ");
             output = playerQuit();
         }
         cin.nextLine();//clears the input
         System.out.println();
         return output;
     }
-    
+
     private String reportWinner(Player win) {
-        String output = new String(new char[82]).replace("\0", "-") + "\n" 
+        String output = new String(new char[82]).replace("\0", "-") + "\n"
                 + win + " has won!\n(Final) " + win.getPersonalGrid();
         return output;
     }
