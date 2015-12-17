@@ -11,7 +11,7 @@ import java.util.regex.*;
 public class Player {
     
     public enum Direction { up, down, left, right }
-    private Ship[] fleet;
+    protected Ship[] fleet;
     private String name;
     private SeaGrid personalGrid;
     private SeaGrid targetGrid = new SeaGrid("Target grid");;
@@ -98,25 +98,18 @@ public class Player {
             }
             //breakes the input into an array
             String arr[] = input.split(" "); 
+            
             //processes the array according to the inputs
             int row = Integer.parseInt(arr[0]) - 1;
             int col = Integer.parseInt(arr[1]) - 1;
             int dir = charToIntDir(arr[2].toUpperCase().charAt(0));
+            int size = fleet[shipIndex].getSize();
             
-            //if ship position is valid
-            if (validPlacement(row, col, dir, fleet[shipIndex].getSize())) {
-                for (int i = 0; i < fleet[shipIndex].getSize(); i++) {
-                    //places ship
-                    personalGrid.setSquare(row, col, fleet[shipIndex].getTitle());
-                    if (dir == 0)//down
-                        row++;
-                    else if (dir == 1)//up
-                        row--;
-                    else if (dir == 2)//right
-                        col++;
-                    else if (dir == 3)//left
-                        col--;
-                }
+            //if ship position is valid place ship on grid
+            if (validPlacement(row, col, dir, size)) {
+                updateShipOnGrid(true, row, col, dir, size, fleet[shipIndex].getTitle());
+                fleet[shipIndex].setDirection(dir);
+                fleet[shipIndex].setLocation(row, col);
                 shipIndex++;//next ship
             }
             else 
@@ -196,6 +189,26 @@ public class Player {
         }
     }
     
+    public void updateShipOnGrid(boolean personal, int row, int col, int dir, int size, char title) {
+        SeaGrid grid;
+        if (personal)
+            grid = personalGrid;
+        else
+            grid = targetGrid;
+        
+        for (int i = 0; i < size; i++) {
+            grid.setSquare(row, col, title);
+            if (dir == 0)//down
+                row++;
+            else if (dir == 1)//up
+                row--;
+            else if (dir == 2)//right
+                col++;
+            else if (dir == 3)//left
+                col--;
+        }
+    }
+    
     /**
      *
      * @return PersonalGrid
@@ -269,12 +282,12 @@ public class Player {
      * @param row
      * @param col
      */
-    public Ship.Enum updatePersonalGrid(int row, int col)
+    public Ship updatePersonalGrid(int row, int col)
     {
         char square = personalGrid.getSquare(row, col);
         char ship = '^';
         int index = 0;
-        Ship.Enum output = null;
+        Ship output = null;
         
         for (int i = 0; i < fleet.length && square != ship; i++) {
             ship = fleet[i].getTitle();
@@ -287,20 +300,23 @@ public class Player {
             if(fleet[index].isSunk()) {
                 System.out.println(name + "'s " + fleet[index].getName() 
                         + " was sunk!");
-                output = fleet[index].getEnum(); //returns the sunk ship
+                output = fleet[index]; //returns the sunk ship
                 
                 int[] sunk = fleet[index].getLocation();
                 int dir = fleet[index].getDirection();
-                for (int i = 0; i < fleet[index].getSize(); i++) {
-                    personalGrid.setSquare(sunk[0], sunk[1], 'X');
-                    if (dir == 0)//down
-                        sunk[0]++;
-                    else if (dir == 1)//up
-                        sunk[0]--;
-                    else if (dir == 2)//right
-                        sunk[1]++;
-                    else if (dir == 3)//left
-                        sunk[1]--;                }
+                int size = fleet[index].getSize();
+                updateShipOnGrid(true, sunk[0], sunk[1], dir, size, 'X');
+//                for (int i = 0; i < fleet[index].getSize(); i++) {
+//                    personalGrid.setSquare(sunk[0], sunk[1], 'X');
+//                    if (dir == 0)//down
+//                        sunk[0]++;
+//                    else if (dir == 1)//up
+//                        sunk[0]--;
+//                    else if (dir == 2)//right
+//                        sunk[1]++;
+//                    else if (dir == 3)//left
+//                        sunk[1]--;
+//                }
             }
             else
                 personalGrid.setSquare(row, col, 'H');
